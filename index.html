@@ -414,37 +414,26 @@
         }
 
         function parseTranslatedSRT(content) {
-            // Remove subtitle numbers (1, 2, 3...) and timing lines, extract only text
-            const lines = content.trim().split('\n');
-            const textLines = [];
-            
-            for (let i = 0; i < lines.length; i++) {
-                const line = lines[i].trim();
-                
-                // Skip empty lines
-                if (!line) continue;
-                
-                // Skip if it's just a number (subtitle index)
-                if (/^\d+$/.test(line)) continue;
-                
-                // Skip if it's a timing line (contains -->)
-                if (line.includes('-->')) continue;
-                
-                // This is actual subtitle text
-                textLines.push(line);
-            }
-            
-            return textLines;
+            // Parse translated subtitle file normally (keeping structure)
+            const blocks = content.trim().split(/\n\s*\n/);
+            return blocks.map(block => {
+                const lines = block.split('\n');
+                const text = lines.slice(2).join('\n'); // Skip index and timing, get text only
+                return text;
+            }).filter(text => text.trim()); // Remove empty entries
         }
 
         async function translateText(text) {
             try {
-                // Using Google Translate API via translate.googleapis.com
-                const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=si&dt=t&q=${encodeURIComponent(text)}`);
+                // First attempt: Google Translate API
+                const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`);
                 const data = await response.json();
                 
                 if (data && data[0] && data[0][0] && data[0][0][0]) {
-                    return data[0][0][0];
+                    let translatedText = data[0][0][0];
+                    // Apply Sinhala conversational adjustments
+                    translatedText = makeSinhalaConversational(translatedText);
+                    return translatedText;
                 }
                 return text;
             } catch (error) {
@@ -454,13 +443,75 @@
                     const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|si`);
                     const data = await response.json();
                     if (data.responseStatus === 200) {
-                        return data.responseData.translatedText;
+                        let translatedText = data.responseData.translatedText;
+                        translatedText = makeSinhalaConversational(translatedText);
+                        return translatedText;
                     }
                 } catch (e) {
                     console.error('Fallback translation error:', e);
                 }
                 return text;
             }
+        }
+
+        function makeSinhalaConversational(text) {
+            // Convert formal Sinhala to conversational spoken Sinhala
+            let result = text;
+            
+            // Common formal to informal conversions
+            const conversions = {
+                // Verb endings - formal to informal
+                'ඇත': 'තියෙනවා',
+                'නැත': 'නෑ',
+                'ඇති': 'ඇති',
+                'මට': 'මට',
+                'ඔබට': 'ඔයාට',
+                'ඔබ': 'ඔයා',
+                'ඔහු': 'එයා',
+                'ඇය': 'එයා',
+                'එය': 'ඒක',
+                'මෙය': 'මේක',
+                'කරනු ලැබේ': 'කරනවා',
+                'ලැබේ': 'ලැබෙනවා',
+                'වේ': 'වෙනවා',
+                'විය': 'උනා',
+                'කළ': 'කළා',
+                'කරන': 'කරන',
+                'යනවා': 'යනවා',
+                'එනවා': 'එනවා',
+                'බලන්න': 'බලන්න',
+                'කරන්න': 'කරන්න',
+                'යන්න': 'යන්න',
+                'එන්න': 'එන්න',
+                'ඇත්තේ': 'තියෙන්නේ',
+                'නැත්තේ': 'නැත්තේ',
+                'කරන්නේ': 'කරන්නේ',
+                'යන්නේ': 'යන්නේ',
+                'එන්නේ': 'එන්නේ',
+                'කරමි': 'කරනවා',
+                'යමි': 'යනවා',
+                'එමි': 'එනවා',
+                'බලමි': 'බලනවා',
+                'කියමි': 'කියනවා',
+                'කළෙමි': 'කළා',
+                'ගියෙමි': 'ගියා',
+                'ආවෙමි': 'ආවා',
+                'කරමු': 'කරමු',
+                'යමු': 'යමු',
+                'බලමු': 'බලමු'
+            };
+
+            // Apply conversions
+            for (const [formal, informal] of Object.entries(conversions)) {
+                // Use word boundaries to avoid partial replacements
+                const regex = new RegExp('\\b' + formal + '\\b', 'g');
+                result = result.replace(regex, informal);
+            }
+
+            // Remove excessive formal particles
+            result = result.replace(/ය$/g, ''); // Remove formal ending 'ය'
+            
+            return result;
         }
 
         async function syncSubtitles() {
