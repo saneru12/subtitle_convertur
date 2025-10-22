@@ -1,225 +1,228 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Subtitle Timing Synchronizer + Sinhala Translation</title>
   <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
 
-  <!-- ✅ Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CLJE123NKC"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-CLJE123NKC');
-  </script>
-
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      min-height: 100vh;
-      padding: 15px;
-    }
-    .container {
-      max-width: 900px;
-      margin: auto;
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-      padding: 30px;
-    }
-    h1 {
-      text-align: center;
-      color: #333;
-      margin-bottom: 10px;
-      font-size: 26px;
-    }
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 25px;
-      font-size: 15px;
-    }
-
-    /* Upload section grid responsive */
-    .upload-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-    @media (max-width: 700px) {
-      .upload-section { grid-template-columns: 1fr; }
-    }
-
-    .upload-box {
-      border: 3px dashed #667eea;
-      border-radius: 15px;
-      padding: 25px;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .upload-box:hover { border-color: #764ba2; background: #f8f9ff; }
-    .upload-box.uploaded { border-color: #10b981; background: #f0fdf4; }
-    .upload-box h3 { color: #333; margin-bottom: 8px; }
-    .upload-box p { color: #666; font-size: 13px; margin-bottom: 10px; }
-
-    .btn {
-      border: none;
-      border-radius: 10px;
-      padding: 12px 25px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .btn-upload { background: #667eea; color: white; }
-    .btn-upload:hover { background: #5568d3; }
-    .btn-sync {
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      color: white;
-      font-size: 16px;
-      padding: 15px 30px;
-    }
-    .btn-sync:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-download { background: #10b981; color: white; }
-    .btn-download:hover { background: #059669; }
-
-    .button-group {
+      font-family: "Poppins", sans-serif;
+      background: #f3f4f6;
+      margin: 0;
+      padding: 0;
       display: flex;
       justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
+      align-items: flex-start;
+      min-height: 100vh;
     }
 
-    .status {
-      border: 2px solid #3b82f6;
-      background: #eff6ff;
+    .container {
+      background: white;
+      width: 90%;
+      max-width: 800px;
+      margin-top: 50px;
+      padding: 25px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.6em;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .file-section {
+      margin: 20px 0;
+    }
+
+    .file-section label {
+      font-weight: 600;
+    }
+
+    .file-input {
+      display: block;
+      margin-top: 8px;
+      padding: 8px;
+      width: 100%;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: #f9fafb;
+    }
+
+    .button-group {
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    button {
+      background: linear-gradient(90deg, #667eea, #764ba2);
+      border: none;
+      color: white;
+      padding: 10px 18px;
+      margin: 5px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    button:hover:not(:disabled) {
+      background: linear-gradient(90deg, #5a67d8, #6b46c1);
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #statusBox {
+      margin-top: 12px;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    /* Progress bar */
+    #progressArea {
+      margin: 15px 0;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 28px;
+      background: #e5e7eb;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-top: 8px;
+      box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05);
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transition: width 300ms ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    #previewBox {
+      display: none;
+      margin-top: 15px;
+      background: #f1f5f9;
       border-radius: 10px;
       padding: 10px;
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 15px;
-    }
-    .status.success { background: #f0fdf4; border-color: #10b981; color: #065f46; }
-    .status.error { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
-    .status.warning { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
-
-    .preview {
-      background: #f9fafb;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 15px;
-      display: none;
-      font-size: 13px;
+      max-height: 300px;
       overflow-y: auto;
-      max-height: 250px;
     }
-    input[type="file"] { display: none; }
 
-    .optional-badge {
-      background: #fbbf24;
-      color: #fff;
-      font-size: 11px;
-      padding: 2px 8px;
-      border-radius: 10px;
+    #previewText {
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 13px;
+      color: #333;
+    }
+
+    #downloadBtn {
+      display: none;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>🎬 Subtitle Timing Synchronizer</h1>
-    <p class="subtitle">Original subtitle එක Sinhala කතා බසට sync කරලා translate වෙන tool එක</p>
+    <h1>🎬 Subtitle Timing Synchronizer + Sinhala Translator</h1>
 
-    <div class="upload-section">
-      <div class="upload-box" id="originalBox" onclick="document.getElementById('originalFile').click()">
-        <h3>Original Subtitle</h3>
-        <p>(ඕනෑම භාෂාවක timing)</p>
-        <button class="btn btn-upload">📁 Upload</button>
-        <div id="originalCheck" style="display:none;color:#10b981;">✓ Uploaded</div>
-        <input type="file" id="originalFile" accept=".srt" />
-      </div>
-
-      <div class="upload-box" id="translatedBox" onclick="document.getElementById('translatedFile').click()">
-        <h3>Sinhala Subtitle <span class="optional-badge">Optional</span></h3>
-        <p>(පරිවර්තනය කල files)</p>
-        <button class="btn btn-upload">📁 Upload</button>
-        <div id="translatedCheck" style="display:none;color:#10b981;">✓ Uploaded</div>
-        <input type="file" id="translatedFile" accept=".srt" />
-      </div>
+    <div class="file-section">
+      <label>🟢 Original Subtitle (.srt):</label>
+      <input type="file" id="originalFile" class="file-input" accept=".srt">
     </div>
 
-    <div id="statusBox" class="status" style="display:none;"></div>
+    <div class="file-section">
+      <label>🟡 Translated Subtitle (Optional):</label>
+      <input type="file" id="translatedFile" class="file-input" accept=".srt">
+    </div>
 
     <div class="button-group">
-      <button class="btn btn-sync" id="syncBtn" onclick="syncSubtitles()">🔄 Sync</button>
-      <button class="btn btn-download" id="downloadBtn" onclick="downloadOutput()" style="display:none;">⬇️ Download</button>
+      <button id="syncBtn" onclick="syncSubtitles()">🔄 Sync</button>
     </div>
 
-    <div class="preview" id="previewBox">
+    <div id="progressArea" style="display:none;">
+      <div class="status" id="progressStatus">⏳ Starting...</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill" style="width:0%">0%</div>
+      </div>
+    </div>
+
+    <div id="statusBox"></div>
+
+    <div id="previewBox">
+      <h3>📜 Preview:</h3>
       <pre id="previewText"></pre>
     </div>
+
+    <button id="downloadBtn" onclick="downloadSRT()">⬇️ Download Synced SRT</button>
   </div>
 
   <script>
-    let originalContent = null;
-    let translatedContent = null;
-    let outputContent = null;
+    let originalContent = "";
+    let translatedContent = "";
+    let outputContent = "";
 
-    const originalFile = document.getElementById("originalFile");
-    const translatedFile = document.getElementById("translatedFile");
+    document.getElementById("originalFile").addEventListener("change", (e) => loadFile(e, true));
+    document.getElementById("translatedFile").addEventListener("change", (e) => loadFile(e, false));
 
-    originalFile.addEventListener("change", (e) => {
-      readFile(e.target.files[0], (text) => {
-        originalContent = text;
-        document.getElementById("originalBox").classList.add("uploaded");
-        document.getElementById("originalCheck").style.display = "block";
-        showStatus("Original subtitle upload වුණා ✓", "success");
-      });
-    });
-
-    translatedFile.addEventListener("change", (e) => {
-      readFile(e.target.files[0], (text) => {
-        translatedContent = text;
-        document.getElementById("translatedBox").classList.add("uploaded");
-        document.getElementById("translatedCheck").style.display = "block";
-        showStatus("Sinhala subtitle upload වුණා ✓", "success");
-      });
-    });
-
-    function readFile(file, callback) {
+    function loadFile(event, isOriginal) {
+      const file = event.target.files[0];
       if (!file) return;
       const reader = new FileReader();
-      reader.onload = (e) => callback(e.target.result);
+      reader.onload = (e) => {
+        if (isOriginal) originalContent = e.target.result;
+        else translatedContent = e.target.result;
+        showStatus(`✅ ${file.name} loaded successfully.`, "success");
+      };
       reader.readAsText(file);
     }
 
     function parseSRT(content) {
-      const blocks = content.trim().split(/\n\s*\n/);
-      return blocks.map((block) => {
+      const blocks = content.split(/\n\s*\n/);
+      return blocks.map(block => {
         const lines = block.split("\n");
-        const index = lines[0];
-        const timing = lines[1];
-        const text = lines.slice(2).join("\n");
-        return { index, timing, text };
+        return {
+          index: lines[0],
+          timing: lines[1],
+          text: lines.slice(2).join(" ")
+        };
       });
     }
 
-    // 🌐 Google Translate (Sinhala)
+    function showStatus(msg, type) {
+      const el = document.getElementById("statusBox");
+      el.textContent = msg;
+      el.style.color = type === "error" ? "red" : "green";
+    }
+
+    function setProgress(percent, label) {
+      const area = document.getElementById("progressArea");
+      const fill = document.getElementById("progressFill");
+      const status = document.getElementById("progressStatus");
+      area.style.display = "block";
+      const safePct = Math.max(0, Math.min(100, percent));
+      fill.style.width = safePct + "%";
+      fill.textContent = safePct + "%";
+      status.textContent = label || `Processing... ${safePct}%`;
+    }
+
     async function googleTranslateToSinhala(text) {
-      try {
-        const response = await fetch(
-          `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`
-        );
-        const data = await response.json();
-        return data[0].map((t) => t[0]).join("");
-      } catch {
-        return text;
-      }
+      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`;
+      const response = await fetch(url);
+      const data = await response.json();
+      return data[0].map(item => item[0]).join("");
     }
 
     async function syncSubtitles() {
@@ -231,58 +234,62 @@
       const btn = document.getElementById("syncBtn");
       btn.disabled = true;
       btn.textContent = "⏳ Processing...";
+      setProgress(0, "Initializing...");
 
       try {
         const originalSubs = parseSRT(originalContent);
         let translatedSubs = translatedContent ? parseSRT(translatedContent) : [];
-
+        const total = originalSubs.length;
         const synced = [];
-        for (let i = 0; i < originalSubs.length; i++) {
-          if (translatedSubs[i]) {
-            synced.push({
-              index: i + 1,
-              timing: originalSubs[i].timing,
-              text: translatedSubs[i].text,
-            });
+
+        for (let i = 0; i < total; i++) {
+          const idx = i + 1;
+          let targetText = "";
+
+          if (translatedSubs[i] && translatedSubs[i].text && translatedSubs[i].text.trim() !== "") {
+            targetText = translatedSubs[i].text;
           } else {
-            const siText = await googleTranslateToSinhala(originalSubs[i].text);
-            synced.push({
-              index: i + 1,
-              timing: originalSubs[i].timing,
-              text: siText,
-            });
+            setProgress(Math.round((i / total) * 100), `Translating line ${idx}/${total}...`);
+            targetText = await googleTranslateToSinhala(originalSubs[i].text);
           }
+
+          synced.push({
+            index: idx,
+            timing: originalSubs[i].timing,
+            text: targetText
+          });
+
+          const pct = Math.round((idx / total) * 100);
+          setProgress(pct, `Processed ${idx}/${total} (${pct}%)`);
+          await new Promise(r => setTimeout(r, 100));
         }
 
-        outputContent = synced.map((s) => `${s.index}\n${s.timing}\n${s.text}\n`).join("\n");
+        outputContent = synced.map(s => `${s.index}\n${s.timing}\n${s.text}\n`).join("\n");
+
         document.getElementById("previewText").textContent = outputContent.slice(0, 1000) + "\n...";
         document.getElementById("previewBox").style.display = "block";
         document.getElementById("downloadBtn").style.display = "inline-block";
         showStatus(`✅ සාර්ථකයි! Subtitles ${synced.length}ක් sync වුණා.`, "success");
+
+        setProgress(100, "Completed ✅");
+        setTimeout(() => {
+          document.getElementById("progressArea").style.display = "none";
+        }, 1500);
       } catch (e) {
-        showStatus("❌ Error: " + e.message, "error");
+        showStatus("❌ Error: " + (e.message || e), "error");
+        setProgress(0, "Failed");
       } finally {
         btn.disabled = false;
         btn.textContent = "🔄 Sync";
       }
     }
 
-    function downloadOutput() {
-      if (!outputContent) return;
+    function downloadSRT() {
       const blob = new Blob([outputContent], { type: "text/plain;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "synced_subtitles.srt";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    function showStatus(msg, type) {
-      const box = document.getElementById("statusBox");
-      box.textContent = msg;
-      box.className = "status " + type;
-      box.style.display = "block";
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "synced_subtitles.srt";
+      link.click();
     }
   </script>
 </body>
