@@ -413,6 +413,30 @@
             });
         }
 
+        function parseTranslatedSRT(content) {
+            // Remove subtitle numbers (1, 2, 3...) and timing lines, extract only text
+            const lines = content.trim().split('\n');
+            const textLines = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                // Skip empty lines
+                if (!line) continue;
+                
+                // Skip if it's just a number (subtitle index)
+                if (/^\d+$/.test(line)) continue;
+                
+                // Skip if it's a timing line (contains -->)
+                if (line.includes('-->')) continue;
+                
+                // This is actual subtitle text
+                textLines.push(line);
+            }
+            
+            return textLines;
+        }
+
         async function translateText(text) {
             try {
                 // Using Google Translate API via translate.googleapis.com
@@ -451,15 +475,16 @@
 
             try {
                 const originalSubs = parseSRT(originalContent);
-                let translatedSubs = [];
+                let translatedTexts = [];
                 let skippedCount = 0;
                 
                 if (translatedContent) {
-                    translatedSubs = parseSRT(translatedContent);
+                    // Parse translated content - extract only text lines without numbers and timing
+                    translatedTexts = parseTranslatedSRT(translatedContent);
                     
                     skippedCount = parseInt(document.getElementById('skipLines').value) || 0;
-                    if (skippedCount > 0 && skippedCount < translatedSubs.length) {
-                        translatedSubs = translatedSubs.slice(skippedCount);
+                    if (skippedCount > 0 && skippedCount < translatedTexts.length) {
+                        translatedTexts = translatedTexts.slice(skippedCount);
                         showStatus(`✂️ Translated file එකෙන් පළමු lines ${skippedCount}ක් skip කරනවා...`, 'warning');
                         await new Promise(resolve => setTimeout(resolve, 500));
                     }
@@ -489,15 +514,15 @@
                     }
                 }
 
-                // Then, sync remaining original lines with translated lines
+                // Then, sync remaining original lines with translated text lines
                 for (let i = skippedCount; i < originalSubs.length; i++) {
                     const translatedIndex = i - skippedCount;
                     
-                    if (translatedIndex < translatedSubs.length) {
+                    if (translatedIndex < translatedTexts.length) {
                         syncedSubs.push({
                             index: i + 1,
                             timing: originalSubs[i].timing,
-                            text: translatedSubs[translatedIndex].text
+                            text: translatedTexts[translatedIndex]
                         });
                     } else {
                         // Extra lines need translation
