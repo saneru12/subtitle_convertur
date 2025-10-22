@@ -410,8 +410,49 @@
                 const index = lines[0];
                 const timing = lines[1];
                 const text = lines.slice(2).join('\n');
-                return { index, timing, text };
+                
+                // Parse timing to get start and end timestamps
+                const timeMatch = timing.match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
+                const startTime = timeMatch ? timeToSeconds(timeMatch[1]) : 0;
+                const endTime = timeMatch ? timeToSeconds(timeMatch[2]) : 0;
+                
+                return { index, timing, text, startTime, endTime };
             });
+        }
+
+        function timeToSeconds(timeStr) {
+            const parts = timeStr.split(':');
+            const hours = parseInt(parts[0]);
+            const minutes = parseInt(parts[1]);
+            const secParts = parts[2].split(',');
+            const seconds = parseInt(secParts[0]);
+            const milliseconds = parseInt(secParts[1]);
+            return hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
+        }
+
+        function findMatchingTranslations(originalSub, translatedSubs, usedIndices) {
+            const matches = [];
+            const originalMidpoint = (originalSub.startTime + originalSub.endTime) / 2;
+            
+            for (let i = 0; i < translatedSubs.length; i++) {
+                if (usedIndices.has(i)) continue;
+                
+                const transSub = translatedSubs[i];
+                const transMidpoint = (transSub.startTime + transSub.endTime) / 2;
+                
+                // Check if translated subtitle overlaps or is very close to original
+                const isOverlapping = 
+                    (transSub.startTime <= originalSub.endTime && transSub.endTime >= originalSub.startTime) ||
+                    (Math.abs(transMidpoint - originalMidpoint) < 2); // Within 2 seconds
+                
+                if (isOverlapping) {
+                    matches.push({ index: i, sub: transSub, midpoint: transMidpoint });
+                }
+            }
+            
+            // Sort by midpoint to maintain order
+            matches.sort((a, b) => a.midpoint - b.midpoint);
+            return matches;
         }
 
         async function translateText(text) {
@@ -466,21 +507,46 @@
                 }
 
                 const syncedSubs = [];
+                const usedIndices = new Set();
                 let needsTranslation = false;
 
+                showStatus('🔄 Intelligent timing matching කරනවා...', 'warning');
+                await new Promise(resolve => setTimeout(resolve, 300));
+
                 for (let i = 0; i < originalSubs.length; i++) {
-                    if (i < translatedSubs.length) {
-                        syncedSubs.push({
-                            index: i + 1,
-                            timing: originalSubs[i].timing,
-                            text: translatedSubs[i].text
-                        });
+                    const originalSub = originalSubs[i];
+                    
+                    if (translatedSubs.length > 0) {
+                        // Find all matching translated subtitles based on timing
+                        const matches = findMatchingTranslations(originalSub, translatedSubs, usedIndices);
+                        
+                        if (matches.length > 0) {
+                            // Merge all matching translations into one
+                            const mergedText = matches.map(m => m.sub.text).join('\n');
+                            matches.forEach(m => usedIndices.add(m.index));
+                            
+                            syncedSubs.push({
+                                index: i + 1,
+                                timing: originalSub.timing,
+                                text: mergedText
+                            });
+                        } else {
+                            // No match found, needs translation
+                            needsTranslation = true;
+                            syncedSubs.push({
+                                index: i + 1,
+                                timing: originalSub.timing,
+                                text: originalSub.text,
+                                needsTranslation: true
+                            });
+                        }
                     } else {
+                        // No translated file, needs translation
                         needsTranslation = true;
                         syncedSubs.push({
                             index: i + 1,
-                            timing: originalSubs[i].timing,
-                            text: originalSubs[i].text,
+                            timing: originalSub.timing,
+                            text: originalSub.text,
                             needsTranslation: true
                         });
                     }
