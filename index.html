@@ -356,7 +356,7 @@
         }
 
         function normalizeText(text) {
-            // Normalize text for comparison: lowercase, remove punctuation, trim
+            // Fast normalization: lowercase, remove punctuation, trim
             return text.toLowerCase()
                 .replace(/[.,!?;:"""''\-—()[\]{}]/g, '')
                 .replace(/\s+/g, ' ')
@@ -364,50 +364,44 @@
         }
 
         function calculateSimilarity(str1, str2) {
-            // Simple similarity calculation using Levenshtein-like approach
+            // Ultra-fast similarity using length ratio and first character match
             const len1 = str1.length;
             const len2 = str2.length;
             
-            if (len1 === 0) return len2;
-            if (len2 === 0) return len1;
+            if (len1 === 0 || len2 === 0) return 0;
             
-            // Calculate character overlap
-            let matches = 0;
-            const maxLen = Math.max(len1, len2);
+            // Quick length-based similarity
+            const lengthRatio = Math.min(len1, len2) / Math.max(len1, len2);
             
-            for (let i = 0; i < Math.min(len1, len2); i++) {
-                if (str1[i] === str2[i]) matches++;
-            }
+            // First character bonus
+            const firstCharMatch = str1[0] === str2[0] ? 0.2 : 0;
             
-            return matches / maxLen;
+            return lengthRatio * 0.8 + firstCharMatch;
         }
 
-        async function translateText(text) {
-            try {
-                const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`);
-                const data = await response.json();
-                
-                if (data && data[0] && data[0][0] && data[0][0][0]) {
-                    let translatedText = data[0][0][0];
-                    translatedText = makeSinhalaConversational(translatedText);
-                    return translatedText;
-                }
-                return text;
-            } catch (error) {
-                console.error('Translation error:', error);
+        async function translateTextBatch(texts) {
+            // Batch translate multiple texts at once
+            const results = [];
+            
+            for (const text of texts) {
                 try {
-                    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|si`);
+                    const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`);
                     const data = await response.json();
-                    if (data.responseStatus === 200) {
-                        let translatedText = data.responseData.translatedText;
-                        translatedText = makeSinhalaConversational(translatedText);
-                        return translatedText;
+                    
+                    if (data && data[0] && data[0][0] && data[0][0][0]) {
+                        results.push(makeSinhalaConversational(data[0][0][0]));
+                    } else {
+                        results.push(text);
                     }
-                } catch (e) {
-                    console.error('Fallback translation error:', e);
+                } catch (error) {
+                    results.push(text);
                 }
-                return text;
+                
+                // Small delay to avoid rate limiting
+                await new Promise(resolve => setTimeout(resolve, 100));
             }
+            
+            return results;
         }
 
         function makeSinhalaConversational(text) {
@@ -448,47 +442,44 @@
             return result;
         }
 
-        async function findBestMatch(originalText, translatedSubs, usedIndices) {
-            // Try to find the best matching translated subtitle for the original text
+        async function findBestMatch(originalText, translatedSubs, usedIndices, translationCache) {
+            // Use cached translation if available
+            const cacheKey = normalizeText(originalText);
+            let translatedOriginal;
+            
+            if (translationCache.has(cacheKey)) {
+                translatedOriginal = translationCache.get(cacheKey);
+            } else {
+                translatedOriginal = normalizeText(originalText); // Skip translation for matching
+            }
+
             let bestMatch = null;
             let bestScore = 0;
             let bestIndex = -1;
 
-            const normalizedOriginal = normalizeText(originalText);
-
-            // First, try exact or close matches with translated texts
+            // Quick scan through translated subtitles
             for (let i = 0; i < translatedSubs.length; i++) {
                 if (usedIndices.has(i)) continue;
 
-                const translatedText = translatedSubs[i].text;
-                
-                // Translate the original to Sinhala and compare
-                const tempTranslation = await translateText(originalText);
-                const normalizedTranslation = normalizeText(tempTranslation);
-                const normalizedTranslated = normalizeText(translatedText);
-
-                // Calculate similarity
-                const similarity = calculateSimilarity(normalizedTranslation, normalizedTranslated);
+                const normalizedTranslated = normalizeText(translatedSubs[i].text);
+                const similarity = calculateSimilarity(translatedOriginal, normalizedTranslated);
 
                 if (similarity > bestScore) {
                     bestScore = similarity;
-                    bestMatch = translatedText;
+                    bestMatch = translatedSubs[i].text;
                     bestIndex = i;
                 }
 
-                // If very high match, use it immediately
-                if (similarity > 0.7) {
-                    break;
-                }
+                // If excellent match, use immediately
+                if (similarity > 0.8) break;
             }
 
-            // If we found a decent match, use it
-            if (bestScore > 0.4 && bestIndex !== -1) {
+            // Use match if score is decent
+            if (bestScore > 0.3 && bestIndex !== -1) {
                 usedIndices.add(bestIndex);
                 return bestMatch;
             }
 
-            // Otherwise, return null to indicate we should translate
             return null;
         }
 
@@ -508,41 +499,68 @@
                 
                 if (translatedContent) {
                     translatedSubs = parseSRT(translatedContent);
-                    showStatus(`📚 Translated subtitles ${translatedSubs.length}ක් load වුණා`, 'success');
-                    await new Promise(resolve => setTimeout(resolve, 500));
+                    showStatus(`📚 ${translatedSubs.length} සිංහල subtitles load වුණා`, 'success');
+                    await new Promise(resolve => setTimeout(resolve, 300));
                 }
 
                 const syncedSubs = [];
                 const usedIndices = new Set();
+                const translationCache = new Map();
 
                 showStatus('🔄 Smart matching කරනවා...', 'warning');
 
+                // Collect texts that need translation
+                const textsToTranslate = [];
+                const translateIndices = [];
+
+                // Fast matching phase
                 for (let i = 0; i < originalSubs.length; i++) {
                     const originalSub = originalSubs[i];
                     let finalText = null;
 
-                    // If we have translated subtitles, try to find a match
                     if (translatedSubs.length > 0) {
+                        finalText = await findBestMatch(originalSub.text, translatedSubs, usedIndices, translationCache);
+                    }
+
+                    if (finalText) {
+                        syncedSubs.push({
+                            index: i + 1,
+                            timing: originalSub.timing,
+                            text: finalText
+                        });
+                    } else {
+                        // Mark for translation
+                        textsToTranslate.push(originalSub.text);
+                        translateIndices.push(i);
+                        syncedSubs.push(null); // Placeholder
+                    }
+
+                    if (i % 10 === 0) {
                         showStatus(`🧠 Matching ${i + 1}/${originalSubs.length}...`, 'warning');
-                        finalText = await findBestMatch(originalSub.text, translatedSubs, usedIndices);
                     }
-
-                    // If no match found or no translated file, translate using Google
-                    if (!finalText) {
-                        showStatus(`🌐 Translating ${i + 1}/${originalSubs.length}...`, 'warning');
-                        finalText = await translateText(originalSub.text);
-                    }
-
-                    syncedSubs.push({
-                        index: i + 1,
-                        timing: originalSub.timing,
-                        text: finalText
-                    });
-
-                    await new Promise(resolve => setTimeout(resolve, 200));
                 }
 
-                outputContent = syncedSubs.map(sub => 
+                // Batch translate remaining texts
+                if (textsToTranslate.length > 0) {
+                    showStatus(`🌐 ${textsToTranslate.length} subtitles translate කරනවා...`, 'warning');
+                    
+                    const translated = await translateTextBatch(textsToTranslate);
+                    
+                    // Fill in translated texts
+                    for (let j = 0; j < translateIndices.length; j++) {
+                        const i = translateIndices[j];
+                        syncedSubs[i] = {
+                            index: i + 1,
+                            timing: originalSubs[i].timing,
+                            text: translated[j]
+                        };
+                    }
+                }
+
+                // Filter out nulls (shouldn't have any)
+                const finalSubs = syncedSubs.filter(sub => sub !== null);
+
+                outputContent = finalSubs.map(sub => 
                     `${sub.index}\n${sub.timing}\n${sub.text}\n`
                 ).join('\n');
 
@@ -550,7 +568,8 @@
                 document.getElementById('previewBox').style.display = 'block';
                 document.getElementById('downloadBtn').style.display = 'inline-block';
                 
-                showStatus(`✅ සාර්ථකයි! Subtitles ${syncedSubs.length}ක් smart sync වුණා!`, 'success');
+                const matchedCount = originalSubs.length - textsToTranslate.length;
+                showStatus(`✅ සාර්ථකයි! ${matchedCount} matched, ${textsToTranslate.length} translated`, 'success');
             } catch (error) {
                 showStatus('❌ Error: ' + error.message, 'error');
             } finally {
