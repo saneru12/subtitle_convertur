@@ -1,344 +1,497 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Subtitle Timing Synchronizer + Sinhala Translation</title>
-  <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
-
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
-
-    body {
-      font-family: "Poppins", sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
-      margin: 0;
-      padding: 0;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .container {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
-      width: 90%;
-      max-width: 800px;
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-      animation: fadeIn 0.6s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 1.7em;
-      color: #333;
-      margin-bottom: 20px;
-    }
-
-    .file-section {
-      margin: 20px 0;
-    }
-
-    .file-section label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 8px;
-      color: #444;
-    }
-
-    .file-input {
-      display: block;
-      padding: 10px;
-      width: 100%;
-      border: 2px dashed #c3c4f0;
-      border-radius: 10px;
-      background: #f9fafb;
-      text-align: center;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .file-input:hover {
-      background: #eef2ff;
-    }
-
-    .button-group {
-      text-align: center;
-      margin-top: 15px;
-    }
-
-    button {
-      background: linear-gradient(90deg, #667eea, #764ba2);
-      border: none;
-      color: white;
-      padding: 10px 22px;
-      margin: 5px;
-      font-weight: 600;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
-    }
-
-    button:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 14px rgba(118, 75, 162, 0.4);
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    #statusBox {
-      margin-top: 12px;
-      text-align: center;
-      font-weight: 500;
-    }
-
-    /* Progress bar */
-    #progressArea {
-      margin: 20px 0;
-    }
-
-    .progress-bar {
-      width: 100%;
-      height: 28px;
-      background: #e5e7eb;
-      border-radius: 14px;
-      overflow: hidden;
-      margin-top: 8px;
-      box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.05);
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-      transition: width 300ms ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
-    #previewBox {
-      display: none;
-      margin-top: 20px;
-      background: #f9fafb;
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      transition: 0.3s;
-    }
-
-    #previewBox h3 {
-      margin-top: 0;
-      color: #444;
-      font-size: 1.1em;
-    }
-
-    #previewText {
-      white-space: pre-wrap;
-      font-family: monospace;
-      font-size: 13px;
-      color: #333;
-      max-height: 300px;
-      overflow-y: auto;
-    }
-
-    #downloadBtn {
-      display: none;
-      margin-top: 15px;
-      background: linear-gradient(90deg, #16a34a, #22c55e);
-      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
-    }
-
-    #downloadBtn:hover {
-      box-shadow: 0 6px 14px rgba(22, 163, 74, 0.5);
-    }
-
-    footer {
-      text-align: center;
-      color: white;
-      margin-top: 20px;
-      font-size: 0.9em;
-      opacity: 0.8;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtitle Timing Synchronizer with Auto-Translation</title>
+    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
+    <!-- ✅ Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CLJE123NKC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-CLJE123NKC');
+    </script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: clamp(20px, 5vw, 32px);
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 20px;
+            font-size: clamp(12px, 3vw, 16px);
+            padding: 0 10px;
+        }
+        .upload-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        @media (min-width: 640px) {
+            .container {
+                padding: 40px;
+            }
+            .upload-section {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+                margin-bottom: 30px;
+            }
+        }
+        .upload-box {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        .upload-box:hover {
+            border-color: #764ba2;
+            background: #f8f9ff;
+        }
+        .upload-box.uploaded {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .upload-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: clamp(16px, 4vw, 20px);
+        }
+        .upload-box p {
+            color: #666;
+            font-size: clamp(12px, 3vw, 14px);
+            margin-bottom: 15px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: clamp(14px, 3vw, 16px);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        @media (min-width: 640px) {
+            .btn {
+                padding: 12px 30px;
+            }
+        }
+        .btn-upload {
+            background: #667eea;
+            color: white;
+        }
+        .btn-upload:hover {
+            background: #5568d3;
+        }
+        .btn-sync {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: clamp(14px, 4vw, 18px);
+            padding: 12px 25px;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .btn-sync {
+                padding: 15px 40px;
+                width: auto;
+            }
+        }
+        .btn-sync:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .btn-sync:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-download {
+            background: #10b981;
+            color: white;
+            font-size: clamp(14px, 4vw, 18px);
+            padding: 12px 25px;
+            width: 100%;
+        }
+        @media (min-width: 640px) {
+            .btn-download {
+                padding: 15px 40px;
+                width: auto;
+            }
+        }
+        .btn-download:hover {
+            background: #059669;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        @media (min-width: 640px) {
+            .button-group {
+                flex-direction: row;
+                gap: 15px;
+            }
+        }
+        .status {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 15px;
+            font-weight: bold;
+            color: #1e40af;
+            font-size: clamp(12px, 3vw, 16px);
+        }
+        .status.success {
+            background: #f0fdf4;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .status.error {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .status.warning {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #e5e7eb;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .preview {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .preview h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: clamp(16px, 4vw, 20px);
+        }
+        .preview pre {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: clamp(10px, 2.5vw, 12px);
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .instructions {
+            background: #fef3c7;
+            border: 2px solid #fbbf24;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .instructions h4 {
+            color: #92400e;
+            margin-bottom: 10px;
+            font-size: clamp(14px, 3.5vw, 18px);
+        }
+        .instructions ol {
+            color: #78350f;
+            padding-left: 20px;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+        .instructions li {
+            margin-bottom: 5px;
+        }
+        .instructions p {
+            font-size: clamp(11px, 2.5vw, 13px);
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .icon {
+            font-size: clamp(32px, 8vw, 48px);
+            margin-bottom: 10px;
+        }
+        .checkmark {
+            color: #10b981;
+            font-size: clamp(16px, 4vw, 20px);
+            margin-top: 10px;
+            display: none;
+        }
+        #downloadBtn {
+            display: none;
+        }
+        .optional-badge {
+            display: inline-block;
+            background: #fbbf24;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: clamp(9px, 2vw, 11px);
+            font-weight: bold;
+            margin-left: 5px;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎬 Subtitle Timing Synchronizer + Sinhala Translator</h1>
+    <div class="container">
+        <h1>🎬 Subtitle Timing Synchronizer</h1>
+        <p class="subtitle">Original timing එක සමග Sinhala subtitles sync කරන්න + Auto Translation</p>
 
-    <div class="file-section">
-      <label>🟢 Original Subtitle (.srt):</label>
-      <input type="file" id="originalFile" class="file-input" accept=".srt">
+        <div class="upload-section">
+            <div class="upload-box" id="originalBox" onclick="document.getElementById('originalFile').click()">
+                <div class="icon">⏱️</div>
+                <h3>Original Subtitle</h3>
+                <p>(ඕනෑම භාෂාවක - timing සඳහා)</p>
+                <button class="btn btn-upload">📁 Upload කරන්න</button>
+                <div class="checkmark" id="originalCheck">✓ Uploaded</div>
+                <input type="file" id="originalFile" accept=".srt">
+            </div>
+
+            <div class="upload-box" id="translatedBox" onclick="document.getElementById('translatedFile').click()">
+                <div class="icon">📝</div>
+                <h3>Sinhala Subtitle <span class="optional-badge">විකල්ප</span></h3>
+                <p>(පරිවර්තනය කළ - වචන සඳහා)</p>
+                <button class="btn btn-upload">📁 Upload කරන්න</button>
+                <div class="checkmark" id="translatedCheck">✓ Uploaded</div>
+                <input type="file" id="translatedFile" accept=".srt">
+            </div>
+        </div>
+
+        <div id="statusBox" class="status" style="display:none;"></div>
+
+        <div class="button-group">
+            <button class="btn btn-sync" id="syncBtn" onclick="syncSubtitles()">🔄 Sync කරන්න</button>
+            <button class="btn btn-download" id="downloadBtn" onclick="downloadOutput()">⬇️ Download කරන්න</button>
+        </div>
+
+        <div class="preview" id="previewBox">
+            <h3>Preview:</h3>
+            <pre id="previewText"></pre>
+        </div>
+
+        <div class="instructions">
+            <h4>📌 භාවිතා කරන ආකාරය:</h4>
+            <ol>
+                <li>Original subtitle file එක upload කරන්න (timing වලට)</li>
+                <li><strong>විකල්ප:</strong> Sinhala translated subtitle file එක upload කරන්න</li>
+                <li>"Sync කරන්න" button එක click කරන්න</li>
+                <li><strong>නව!</strong> Sinhala file එකක් නැත්නම්, extra lines auto-translate වෙනවා (Google Translate)</li>
+                <li>Output file එක download කරන්න</li>
+            </ol>
+            <p style="margin-top:10px;"><strong>⚠️ සටහන:</strong> Auto-translation Google Translate API use කරනවා. Best results සඳහා translated file එකක් upload කරන්න!</p>
+        </div>
     </div>
 
-    <div class="file-section">
-      <label>🟡 Translated Subtitle (Optional):</label>
-      <input type="file" id="translatedFile" class="file-input" accept=".srt">
-    </div>
+    <script>
+        let originalContent = null;
+        let translatedContent = null;
+        let outputContent = null;
 
-    <div class="button-group">
-      <button id="syncBtn" onclick="syncSubtitles()">🔄 Sync & Translate</button>
-    </div>
+        document.getElementById('originalFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    <div id="progressArea" style="display:none;">
-      <div class="status" id="progressStatus">⏳ Starting...</div>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width:0%">0%</div>
-      </div>
-    </div>
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                originalContent = event.target.result;
+                document.getElementById('originalBox').classList.add('uploaded');
+                document.getElementById('originalCheck').style.display = 'block';
+                showStatus('Original subtitle ගොනුව upload වුණා ✓', 'success');
+            };
+            reader.readAsText(file);
+        });
 
-    <div id="statusBox"></div>
+        document.getElementById('translatedFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    <div id="previewBox">
-      <h3>📜 Preview:</h3>
-      <pre id="previewText"></pre>
-    </div>
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                translatedContent = event.target.result;
+                document.getElementById('translatedBox').classList.add('uploaded');
+                document.getElementById('translatedCheck').style.display = 'block';
+                showStatus('Sinhala subtitle ගොනුව upload වුණා ✓', 'success');
+            };
+            reader.readAsText(file);
+        });
 
-    <div class="button-group">
-      <button id="downloadBtn" onclick="downloadSRT()">⬇️ Download Synced SRT</button>
-    </div>
-  </div>
-
-
-
-  <script>
-    let originalContent = "";
-    let translatedContent = "";
-    let outputContent = "";
-
-    document.getElementById("originalFile").addEventListener("change", (e) => loadFile(e, true));
-    document.getElementById("translatedFile").addEventListener("change", (e) => loadFile(e, false));
-
-    function loadFile(event, isOriginal) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        if (isOriginal) originalContent = e.target.result;
-        else translatedContent = e.target.result;
-        showStatus(`✅ ${file.name} loaded successfully.`, "success");
-      };
-      reader.readAsText(file);
-    }
-
-    function parseSRT(content) {
-      const blocks = content.split(/\n\s*\n/);
-      return blocks.map(block => {
-        const lines = block.split("\n");
-        return {
-          index: lines[0],
-          timing: lines[1],
-          text: lines.slice(2).join(" ")
-        };
-      });
-    }
-
-    function showStatus(msg, type) {
-      const el = document.getElementById("statusBox");
-      el.textContent = msg;
-      el.style.color = type === "error" ? "red" : "green";
-    }
-
-    function setProgress(percent, label) {
-      const area = document.getElementById("progressArea");
-      const fill = document.getElementById("progressFill");
-      const status = document.getElementById("progressStatus");
-      area.style.display = "block";
-      const safePct = Math.max(0, Math.min(100, percent));
-      fill.style.width = safePct + "%";
-      fill.textContent = safePct + "%";
-      status.textContent = label || `Processing... ${safePct}%`;
-    }
-
-    async function googleTranslateToSinhala(text) {
-      const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`;
-      const response = await fetch(url);
-      const data = await response.json();
-      return data[0].map(item => item[0]).join("");
-    }
-
-    async function syncSubtitles() {
-      if (!originalContent) {
-        showStatus("⚠️ Original subtitle එක upload කරන්න!", "error");
-        return;
-      }
-
-      const btn = document.getElementById("syncBtn");
-      btn.disabled = true;
-      btn.textContent = "⏳ Processing...";
-      setProgress(0, "Initializing...");
-
-      try {
-        const originalSubs = parseSRT(originalContent);
-        let translatedSubs = translatedContent ? parseSRT(translatedContent) : [];
-        const total = originalSubs.length;
-        const synced = [];
-
-        for (let i = 0; i < total; i++) {
-          const idx = i + 1;
-          let targetText = "";
-
-          if (translatedSubs[i] && translatedSubs[i].text && translatedSubs[i].text.trim() !== "") {
-            targetText = translatedSubs[i].text;
-          } else {
-            setProgress(Math.round((i / total) * 100), `Translating line ${idx}/${total}...`);
-            targetText = await googleTranslateToSinhala(originalSubs[i].text);
-          }
-
-          synced.push({
-            index: idx,
-            timing: originalSubs[i].timing,
-            text: targetText
-          });
-
-          const pct = Math.round((idx / total) * 100);
-          setProgress(pct, `Processed ${idx}/${total} (${pct}%)`);
-          await new Promise(r => setTimeout(r, 80));
+        function parseSRT(content) {
+            const blocks = content.trim().split(/\n\s*\n/);
+            return blocks.map(block => {
+                const lines = block.split('\n');
+                const index = lines[0];
+                const timing = lines[1];
+                const text = lines.slice(2).join('\n');
+                return { index, timing, text };
+            });
         }
 
-        outputContent = synced.map(s => `${s.index}\n${s.timing}\n${s.text}\n`).join("\n");
+        async function translateText(text) {
+            try {
+                // Using Google Translate API via translate.googleapis.com
+                const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=si&dt=t&q=${encodeURIComponent(text)}`);
+                const data = await response.json();
+                
+                if (data && data[0] && data[0][0] && data[0][0][0]) {
+                    return data[0][0][0];
+                }
+                return text;
+            } catch (error) {
+                console.error('Translation error:', error);
+                // Fallback to MyMemory API
+                try {
+                    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|si`);
+                    const data = await response.json();
+                    if (data.responseStatus === 200) {
+                        return data.responseData.translatedText;
+                    }
+                } catch (e) {
+                    console.error('Fallback translation error:', e);
+                }
+                return text;
+            }
+        }
 
-        document.getElementById("previewText").textContent = outputContent.slice(0, 1000) + "\n...";
-        document.getElementById("previewBox").style.display = "block";
-        document.getElementById("downloadBtn").style.display = "inline-block";
-        showStatus(`✅ සාර්ථකයි! Subtitles ${synced.length}ක් sync වුණා.`, "success");
+        async function syncSubtitles() {
+            if (!originalContent) {
+                showStatus('⚠️ Original subtitle file එක upload කරන්න!', 'error');
+                return;
+            }
 
-        setProgress(100, "Completed ✅");
-        setTimeout(() => {
-          document.getElementById("progressArea").style.display = "none";
-        }, 1500);
-      } catch (e) {
-        showStatus("❌ Error: " + (e.message || e), "error");
-        setProgress(0, "Failed");
-      } finally {
-        btn.disabled = false;
-        btn.textContent = "🔄 Sync & Translate";
-      }
-    }
+            const syncBtn = document.getElementById('syncBtn');
+            syncBtn.disabled = true;
+            syncBtn.textContent = '⏳ Processing...';
 
-    function downloadSRT() {
-      const blob = new Blob([outputContent], { type: "text/plain;charset=utf-8" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "synced_subtitles.srt";
-      link.click();
-    }
-  </script>
-    <footer>© 2025 Subtitle Sync Tool by Saneru</footer>
+            try {
+                const originalSubs = parseSRT(originalContent);
+                let translatedSubs = [];
+                
+                if (translatedContent) {
+                    translatedSubs = parseSRT(translatedContent);
+                }
+
+                const syncedSubs = [];
+                let needsTranslation = false;
+
+                for (let i = 0; i < originalSubs.length; i++) {
+                    if (i < translatedSubs.length) {
+                        syncedSubs.push({
+                            index: i + 1,
+                            timing: originalSubs[i].timing,
+                            text: translatedSubs[i].text
+                        });
+                    } else {
+                        needsTranslation = true;
+                        syncedSubs.push({
+                            index: i + 1,
+                            timing: originalSubs[i].timing,
+                            text: originalSubs[i].text,
+                            needsTranslation: true
+                        });
+                    }
+                }
+
+                if (needsTranslation) {
+                    showStatus('🌐 Extra lines translate කරනවා... කරුණාකර රැඳී සිටින්න', 'warning');
+                    
+                    const toTranslate = syncedSubs.filter(sub => sub.needsTranslation);
+                    let translated = 0;
+
+                    for (let sub of toTranslate) {
+                        sub.text = await translateText(sub.text);
+                        delete sub.needsTranslation;
+                        translated++;
+                        
+                        const progress = Math.round((translated / toTranslate.length) * 100);
+                        showStatus(`🌐 Translating... ${translated}/${toTranslate.length} (${progress}%)`, 'warning');
+                        
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                }
+
+                outputContent = syncedSubs.map(sub => 
+                    `${sub.index}\n${sub.timing}\n${sub.text}\n`
+                ).join('\n');
+
+                document.getElementById('previewText').textContent = outputContent.slice(0, 1000) + '\n...';
+                document.getElementById('previewBox').style.display = 'block';
+                document.getElementById('downloadBtn').style.display = 'inline-block';
+                
+                showStatus(`✅ සාර්ථකයි! Subtitles ${syncedSubs.length}ක් sync වුණා!`, 'success');
+            } catch (error) {
+                showStatus('❌ Error: ' + error.message, 'error');
+            } finally {
+                syncBtn.disabled = false;
+                syncBtn.textContent = '🔄 Sync කරන්න';
+            }
+        }
+
+        function downloadOutput() {
+            if (!outputContent) return;
+            
+            const blob = new Blob([outputContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'synced_subtitles.srt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function showStatus(message, type) {
+            const statusBox = document.getElementById('statusBox');
+            statusBox.textContent = message;
+            statusBox.className = 'status ' + type;
+            statusBox.style.display = 'block';
+        }
+    </script>
 </body>
 </html>
