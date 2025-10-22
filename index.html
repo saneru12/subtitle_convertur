@@ -339,7 +339,7 @@
             </label>
             <input type="number" id="skipLines" value="0" min="0" max="10">
             <p>
-                සාමාන්‍යයෙන් 2-3 lines skip කරන්න පුළුවන් (credits, intro text අයින් කරන්න)
+                සාමාන්‍යයෙන් 2-3 lines skip කරන්න පුළුවන්. Skip කළ lines original timing එකට translate වෙනවා.
             </p>
         </div>
 
@@ -360,9 +360,8 @@
             <ol>
                 <li>Original subtitle file එක upload කරන්න (timing වලට)</li>
                 <li><strong>විකල්ප:</strong> Sinhala translated subtitle file එක upload කරන්න</li>
-                <li><strong>අනවශ්‍ය lines තියෙනවා නම්:</strong> Skip කරන්න lines ගණන set කරන්න</li>
+                <li><strong>Skip කරන්න ඕනෑ නම්:</strong> Lines ගණන set කරන්න (skip කළ lines auto-translate වෙනවා)</li>
                 <li>"Sync කරන්න" button එක click කරන්න</li>
-                <li><strong>නව!</strong> Sinhala file එකක් නැත්නම්, extra lines auto-translate වෙනවා (Google Translate)</li>
                 <li>Output file එක download කරන්න</li>
             </ol>
             <p style="margin-top:10px;"><strong>⚠️ සටහන:</strong> Auto-translation Google Translate API use කරනවා. Best results සඳහා translated file එකක් upload කරන්න!</p>
@@ -410,68 +409,8 @@
                 const index = lines[0];
                 const timing = lines[1];
                 const text = lines.slice(2).join('\n');
-                
-                // Parse timing to get start and end timestamps
-                const timeMatch = timing.match(/(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})/);
-                const startTime = timeMatch ? timeToSeconds(timeMatch[1]) : 0;
-                const endTime = timeMatch ? timeToSeconds(timeMatch[2]) : 0;
-                
-                return { index, timing, text, startTime, endTime };
+                return { index, timing, text };
             });
-        }
-
-        function timeToSeconds(timeStr) {
-            const parts = timeStr.split(':');
-            const hours = parseInt(parts[0]);
-            const minutes = parseInt(parts[1]);
-            const secParts = parts[2].split(',');
-            const seconds = parseInt(secParts[0]);
-            const milliseconds = parseInt(secParts[1]);
-            return hours * 3600 + minutes * 60 + seconds + milliseconds / 1000;
-        }
-
-        function findMatchingTranslations(originalSub, translatedSubs, usedIndices) {
-            const matches = [];
-            const originalMidpoint = (originalSub.startTime + originalSub.endTime) / 2;
-            
-            for (let i = 0; i < translatedSubs.length; i++) {
-                if (usedIndices.has(i)) continue;
-                
-                const transSub = translatedSubs[i];
-                const transMidpoint = (transSub.startTime + transSub.endTime) / 2;
-                
-                // Check if translated subtitle overlaps or is very close to original
-                const isOverlapping = 
-                    (transSub.startTime <= originalSub.endTime && transSub.endTime >= originalSub.startTime) ||
-                    (Math.abs(transMidpoint - originalMidpoint) < 3); // Within 3 seconds for flexibility
-                
-                if (isOverlapping) {
-                    matches.push({ index: i, sub: transSub, midpoint: transMidpoint });
-                }
-            }
-            
-            // Sort by midpoint to maintain order
-            matches.sort((a, b) => a.midpoint - b.midpoint);
-            return matches;
-        }
-
-        function findClosestUnusedTranslation(originalSub, translatedSubs, usedIndices) {
-            let closest = null;
-            let minDistance = Infinity;
-            
-            for (let i = 0; i < translatedSubs.length; i++) {
-                if (usedIndices.has(i)) continue;
-                
-                const transSub = translatedSubs[i];
-                const distance = Math.abs(transSub.startTime - originalSub.startTime);
-                
-                if (distance < minDistance) {
-                    minDistance = distance;
-                    closest = { index: i, sub: transSub };
-                }
-            }
-            
-            return closest;
         }
 
         async function translateText(text) {
@@ -513,72 +452,60 @@
             try {
                 const originalSubs = parseSRT(originalContent);
                 let translatedSubs = [];
+                let skippedCount = 0;
                 
                 if (translatedContent) {
                     translatedSubs = parseSRT(translatedContent);
                     
-                    const skipCount = parseInt(document.getElementById('skipLines').value) || 0;
-                    if (skipCount > 0 && skipCount < translatedSubs.length) {
-                        translatedSubs = translatedSubs.slice(skipCount);
-                        showStatus(`✂️ Translated file එකෙන් පළමු lines ${skipCount}ක් skip කරනවා...`, 'warning');
+                    skippedCount = parseInt(document.getElementById('skipLines').value) || 0;
+                    if (skippedCount > 0 && skippedCount < translatedSubs.length) {
+                        translatedSubs = translatedSubs.slice(skippedCount);
+                        showStatus(`✂️ Translated file එකෙන් පළමු lines ${skippedCount}ක් skip කරනවා...`, 'warning');
                         await new Promise(resolve => setTimeout(resolve, 500));
                     }
                 }
 
                 const syncedSubs = [];
-                const usedIndices = new Set();
                 let needsTranslation = false;
 
-                showStatus('🔄 Intelligent timing matching කරනවා...', 'warning');
+                showStatus('🔄 Subtitles sync කරනවා...', 'warning');
                 await new Promise(resolve => setTimeout(resolve, 300));
 
-                for (let i = 0; i < originalSubs.length; i++) {
-                    const originalSub = originalSubs[i];
+                // First, handle skipped lines - translate them from original
+                if (skippedCount > 0) {
+                    showStatus(`🌐 Skip කළ lines ${skippedCount}ක් translate කරනවා...`, 'warning');
                     
-                    if (translatedSubs.length > 0) {
-                        // Find all matching translated subtitles based on timing overlap
-                        const matches = findMatchingTranslations(originalSub, translatedSubs, usedIndices);
+                    for (let i = 0; i < Math.min(skippedCount, originalSubs.length); i++) {
+                        const translatedText = await translateText(originalSubs[i].text);
+                        syncedSubs.push({
+                            index: i + 1,
+                            timing: originalSubs[i].timing,
+                            text: translatedText
+                        });
                         
-                        if (matches.length > 0) {
-                            // Merge all matching translations into one
-                            const mergedText = matches.map(m => m.sub.text).join('\n');
-                            matches.forEach(m => usedIndices.add(m.index));
-                            
-                            syncedSubs.push({
-                                index: i + 1,
-                                timing: originalSub.timing,
-                                text: mergedText
-                            });
-                        } else {
-                            // No overlap match, try finding closest unused translation
-                            const closest = findClosestUnusedTranslation(originalSub, translatedSubs, usedIndices);
-                            
-                            if (closest && Math.abs(closest.sub.startTime - originalSub.startTime) < 10) {
-                                // Use closest if within 10 seconds
-                                usedIndices.add(closest.index);
-                                syncedSubs.push({
-                                    index: i + 1,
-                                    timing: originalSub.timing,
-                                    text: closest.sub.text
-                                });
-                            } else {
-                                // Too far or no translation available, needs translation
-                                needsTranslation = true;
-                                syncedSubs.push({
-                                    index: i + 1,
-                                    timing: originalSub.timing,
-                                    text: originalSub.text,
-                                    needsTranslation: true
-                                });
-                            }
-                        }
+                        const progress = Math.round(((i + 1) / skippedCount) * 100);
+                        showStatus(`🌐 Skip කළ lines translate කරනවා... ${i + 1}/${skippedCount} (${progress}%)`, 'warning');
+                        await new Promise(resolve => setTimeout(resolve, 300));
+                    }
+                }
+
+                // Then, sync remaining original lines with translated lines
+                for (let i = skippedCount; i < originalSubs.length; i++) {
+                    const translatedIndex = i - skippedCount;
+                    
+                    if (translatedIndex < translatedSubs.length) {
+                        syncedSubs.push({
+                            index: i + 1,
+                            timing: originalSubs[i].timing,
+                            text: translatedSubs[translatedIndex].text
+                        });
                     } else {
-                        // No translated file, needs translation
+                        // Extra lines need translation
                         needsTranslation = true;
                         syncedSubs.push({
                             index: i + 1,
-                            timing: originalSub.timing,
-                            text: originalSub.text,
+                            timing: originalSubs[i].timing,
+                            text: originalSubs[i].text,
                             needsTranslation: true
                         });
                     }
