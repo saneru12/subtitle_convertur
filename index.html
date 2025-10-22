@@ -1,437 +1,288 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subtitle Timing Synchronizer with Auto-Translation</title>
-    <!-- ✅ Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CLJE123NKC"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-CLJE123NKC');
-    </script>
-    
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 40px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-        }
-        .upload-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .upload-box {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 30px;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .upload-box:hover {
-            border-color: #764ba2;
-            background: #f8f9ff;
-        }
-        .upload-box.uploaded {
-            border-color: #10b981;
-            background: #f0fdf4;
-        }
-        .upload-box h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .upload-box p {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 15px;
-        }
-        .btn {
-            padding: 12px 30px;
-            border: none;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-upload {
-            background: #667eea;
-            color: white;
-        }
-        .btn-upload:hover {
-            background: #5568d3;
-        }
-        .btn-sync {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: 18px;
-            padding: 15px 40px;
-        }
-        .btn-sync:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        .btn-sync:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-download {
-            background: #10b981;
-            color: white;
-            font-size: 18px;
-            padding: 15px 40px;
-        }
-        .btn-download:hover {
-            background: #059669;
-        }
-        .button-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin-bottom: 30px;
-        }
-        .status {
-            background: #eff6ff;
-            border: 2px solid #3b82f6;
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #1e40af;
-        }
-        .status.success {
-            background: #f0fdf4;
-            border-color: #10b981;
-            color: #065f46;
-        }
-        .status.error {
-            background: #fef2f2;
-            border-color: #ef4444;
-            color: #991b1b;
-        }
-        .status.warning {
-            background: #fffbeb;
-            border-color: #f59e0b;
-            color: #92400e;
-        }
-        .progress-bar {
-            width: 100%;
-            height: 25px;
-            background: #e5e7eb;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        .preview {
-            background: #f9fafb;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        .preview h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .preview pre {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            max-height: 300px;
-            overflow-y: auto;
-            font-size: 12px;
-            white-space: pre-wrap;
-        }
-        .instructions {
-            background: #fef3c7;
-            border: 2px solid #fbbf24;
-            border-radius: 10px;
-            padding: 20px;
-        }
-        .instructions h4 {
-            color: #92400e;
-            margin-bottom: 10px;
-        }
-        .instructions ol {
-            color: #78350f;
-            padding-left: 25px;
-        }
-        .instructions li {
-            margin-bottom: 5px;
-        }
-        input[type="file"] {
-            display: none;
-        }
-        .icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        .checkmark {
-            color: #10b981;
-            font-size: 20px;
-            margin-top: 10px;
-            display: none;
-        }
-        #downloadBtn {
-            display: none;
-        }
-        .optional-badge {
-            display: inline-block;
-            background: #fbbf24;
-            color: white;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 5px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Subtitle Timing Synchronizer + Sinhala Translation</title>
+
+  <!-- ✅ Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-CLJE123NKC"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-CLJE123NKC');
+  </script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      padding: 15px;
+    }
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+      margin-bottom: 10px;
+      font-size: 26px;
+    }
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+      font-size: 15px;
+    }
+
+    /* Upload section grid responsive */
+    .upload-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    @media (max-width: 700px) {
+      .upload-section { grid-template-columns: 1fr; }
+    }
+
+    .upload-box {
+      border: 3px dashed #667eea;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .upload-box:hover { border-color: #764ba2; background: #f8f9ff; }
+    .upload-box.uploaded { border-color: #10b981; background: #f0fdf4; }
+    .upload-box h3 { color: #333; margin-bottom: 8px; }
+    .upload-box p { color: #666; font-size: 13px; margin-bottom: 10px; }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 12px 25px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-upload { background: #667eea; color: white; }
+    .btn-upload:hover { background: #5568d3; }
+    .btn-sync {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-size: 16px;
+      padding: 15px 30px;
+    }
+    .btn-sync:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-download { background: #10b981; color: white; }
+    .btn-download:hover { background: #059669; }
+
+    .button-group {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .status {
+      border: 2px solid #3b82f6;
+      background: #eff6ff;
+      border-radius: 10px;
+      padding: 10px;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 15px;
+    }
+    .status.success { background: #f0fdf4; border-color: #10b981; color: #065f46; }
+    .status.error { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+    .status.warning { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+
+    .preview {
+      background: #f9fafb;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      display: none;
+      font-size: 13px;
+      overflow-y: auto;
+      max-height: 250px;
+    }
+    input[type="file"] { display: none; }
+
+    .optional-badge {
+      background: #fbbf24;
+      color: #fff;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎬 Subtitle Timing Synchronizer</h1>
-        <p class="subtitle">Original timing එක සමග Sinhala subtitles sync කරන්න + Auto Translation</p>
+  <div class="container">
+    <h1>🎬 Subtitle Timing Synchronizer</h1>
+    <p class="subtitle">Original subtitle එක Sinhala කතා බසට sync කරලා translate වෙන tool එක</p>
 
-        <div class="upload-section">
-            <div class="upload-box" id="originalBox" onclick="document.getElementById('originalFile').click()">
-                <div class="icon">⏱️</div>
-                <h3>Original Subtitle</h3>
-                <p>(ඕනෑම භාෂාවක - timing සඳහා)</p>
-                <button class="btn btn-upload">📁 Upload කරන්න</button>
-                <div class="checkmark" id="originalCheck">✓ Uploaded</div>
-                <input type="file" id="originalFile" accept=".srt">
-            </div>
+    <div class="upload-section">
+      <div class="upload-box" id="originalBox" onclick="document.getElementById('originalFile').click()">
+        <h3>Original Subtitle</h3>
+        <p>(ඕනෑම භාෂාවක timing)</p>
+        <button class="btn btn-upload">📁 Upload</button>
+        <div id="originalCheck" style="display:none;color:#10b981;">✓ Uploaded</div>
+        <input type="file" id="originalFile" accept=".srt" />
+      </div>
 
-            <div class="upload-box" id="translatedBox" onclick="document.getElementById('translatedFile').click()">
-                <div class="icon">📝</div>
-                <h3>Sinhala Subtitle <span class="optional-badge">විකල්ප</span></h3>
-                <p>(පරිවර්තනය කළ - වචන සඳහා)</p>
-                <button class="btn btn-upload">📁 Upload කරන්න</button>
-                <div class="checkmark" id="translatedCheck">✓ Uploaded</div>
-                <input type="file" id="translatedFile" accept=".srt">
-            </div>
-        </div>
-
-        <div id="statusBox" class="status" style="display:none;"></div>
-
-        <div class="button-group">
-            <button class="btn btn-sync" id="syncBtn" onclick="syncSubtitles()">🔄 Sync කරන්න</button>
-            <button class="btn btn-download" id="downloadBtn" onclick="downloadOutput()">⬇️ Download කරන්න</button>
-        </div>
-
-        <div class="preview" id="previewBox">
-            <h3>Preview:</h3>
-            <pre id="previewText"></pre>
-        </div>
-
-        <div class="instructions">
-            <h4>📌 භාවිතා කරන ආකාරය:</h4>
-            <ol>
-                <li>Original subtitle file එක upload කරන්න (timing වලට)</li>
-                <li><strong>විකල්ප:</strong> Sinhala translated subtitle file එක upload කරන්න</li>
-                <li>"Sync කරන්න" button එක click කරන්න</li>
-                <li><strong>නව!</strong> Sinhala file එකක් නැත්නම්, extra lines auto-translate වෙනවා (MyMemory API)</li>
-                <li>Output file එක download කරන්න</li>
-            </ol>
-            <p style="margin-top:10px; font-size:13px;"><strong>⚠️ සටහන:</strong> Auto-translation නිදහස් API එකක් use කරනවා (daily limit: 500 requests). Best results සඳහා translated file එකක් upload කරන්න!</p>
-        </div>
+      <div class="upload-box" id="translatedBox" onclick="document.getElementById('translatedFile').click()">
+        <h3>Sinhala Subtitle <span class="optional-badge">Optional</span></h3>
+        <p>(පරිවර්තනය කල files)</p>
+        <button class="btn btn-upload">📁 Upload</button>
+        <div id="translatedCheck" style="display:none;color:#10b981;">✓ Uploaded</div>
+        <input type="file" id="translatedFile" accept=".srt" />
+      </div>
     </div>
 
-    <script>
-        let originalContent = null;
-        let translatedContent = null;
-        let outputContent = null;
+    <div id="statusBox" class="status" style="display:none;"></div>
 
-        document.getElementById('originalFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+    <div class="button-group">
+      <button class="btn btn-sync" id="syncBtn" onclick="syncSubtitles()">🔄 Sync</button>
+      <button class="btn btn-download" id="downloadBtn" onclick="downloadOutput()" style="display:none;">⬇️ Download</button>
+    </div>
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                originalContent = event.target.result;
-                document.getElementById('originalBox').classList.add('uploaded');
-                document.getElementById('originalCheck').style.display = 'block';
-                showStatus('Original subtitle ගොනුව upload වුණා ✓', 'success');
-            };
-            reader.readAsText(file);
-        });
+    <div class="preview" id="previewBox">
+      <pre id="previewText"></pre>
+    </div>
+  </div>
 
-        document.getElementById('translatedFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+  <script>
+    let originalContent = null;
+    let translatedContent = null;
+    let outputContent = null;
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                translatedContent = event.target.result;
-                document.getElementById('translatedBox').classList.add('uploaded');
-                document.getElementById('translatedCheck').style.display = 'block';
-                showStatus('Sinhala subtitle ගොනුව upload වුණා ✓', 'success');
-            };
-            reader.readAsText(file);
-        });
+    const originalFile = document.getElementById("originalFile");
+    const translatedFile = document.getElementById("translatedFile");
 
-        function parseSRT(content) {
-            const blocks = content.trim().split(/\n\s*\n/);
-            return blocks.map(block => {
-                const lines = block.split('\n');
-                const index = lines[0];
-                const timing = lines[1];
-                const text = lines.slice(2).join('\n');
-                return { index, timing, text };
+    originalFile.addEventListener("change", (e) => {
+      readFile(e.target.files[0], (text) => {
+        originalContent = text;
+        document.getElementById("originalBox").classList.add("uploaded");
+        document.getElementById("originalCheck").style.display = "block";
+        showStatus("Original subtitle upload වුණා ✓", "success");
+      });
+    });
+
+    translatedFile.addEventListener("change", (e) => {
+      readFile(e.target.files[0], (text) => {
+        translatedContent = text;
+        document.getElementById("translatedBox").classList.add("uploaded");
+        document.getElementById("translatedCheck").style.display = "block";
+        showStatus("Sinhala subtitle upload වුණා ✓", "success");
+      });
+    });
+
+    function readFile(file, callback) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => callback(e.target.result);
+      reader.readAsText(file);
+    }
+
+    function parseSRT(content) {
+      const blocks = content.trim().split(/\n\s*\n/);
+      return blocks.map((block) => {
+        const lines = block.split("\n");
+        const index = lines[0];
+        const timing = lines[1];
+        const text = lines.slice(2).join("\n");
+        return { index, timing, text };
+      });
+    }
+
+    // 🌐 Google Translate (Sinhala)
+    async function googleTranslateToSinhala(text) {
+      try {
+        const response = await fetch(
+          `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`
+        );
+        const data = await response.json();
+        return data[0].map((t) => t[0]).join("");
+      } catch {
+        return text;
+      }
+    }
+
+    async function syncSubtitles() {
+      if (!originalContent) {
+        showStatus("⚠️ Original subtitle එක upload කරන්න!", "error");
+        return;
+      }
+
+      const btn = document.getElementById("syncBtn");
+      btn.disabled = true;
+      btn.textContent = "⏳ Processing...";
+
+      try {
+        const originalSubs = parseSRT(originalContent);
+        let translatedSubs = translatedContent ? parseSRT(translatedContent) : [];
+
+        const synced = [];
+        for (let i = 0; i < originalSubs.length; i++) {
+          if (translatedSubs[i]) {
+            synced.push({
+              index: i + 1,
+              timing: originalSubs[i].timing,
+              text: translatedSubs[i].text,
             });
+          } else {
+            const siText = await googleTranslateToSinhala(originalSubs[i].text);
+            synced.push({
+              index: i + 1,
+              timing: originalSubs[i].timing,
+              text: siText,
+            });
+          }
         }
 
-        async function translateText(text) {
-            try {
-                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|si`);
-                const data = await response.json();
-                if (data.responseStatus === 200) {
-                    return data.responseData.translatedText;
-                }
-                return text;
-            } catch (error) {
-                console.error('Translation error:', error);
-                return text;
-            }
-        }
+        outputContent = synced.map((s) => `${s.index}\n${s.timing}\n${s.text}\n`).join("\n");
+        document.getElementById("previewText").textContent = outputContent.slice(0, 1000) + "\n...";
+        document.getElementById("previewBox").style.display = "block";
+        document.getElementById("downloadBtn").style.display = "inline-block";
+        showStatus(`✅ සාර්ථකයි! Subtitles ${synced.length}ක් sync වුණා.`, "success");
+      } catch (e) {
+        showStatus("❌ Error: " + e.message, "error");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "🔄 Sync";
+      }
+    }
 
-        async function syncSubtitles() {
-            if (!originalContent) {
-                showStatus('⚠️ Original subtitle file එක upload කරන්න!', 'error');
-                return;
-            }
+    function downloadOutput() {
+      if (!outputContent) return;
+      const blob = new Blob([outputContent], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "synced_subtitles.srt";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
 
-            const syncBtn = document.getElementById('syncBtn');
-            syncBtn.disabled = true;
-            syncBtn.textContent = '⏳ Processing...';
-
-            try {
-                const originalSubs = parseSRT(originalContent);
-                let translatedSubs = [];
-                
-                if (translatedContent) {
-                    translatedSubs = parseSRT(translatedContent);
-                }
-
-                const syncedSubs = [];
-                let needsTranslation = false;
-
-                for (let i = 0; i < originalSubs.length; i++) {
-                    if (i < translatedSubs.length) {
-                        syncedSubs.push({
-                            index: i + 1,
-                            timing: originalSubs[i].timing,
-                            text: translatedSubs[i].text
-                        });
-                    } else {
-                        needsTranslation = true;
-                        syncedSubs.push({
-                            index: i + 1,
-                            timing: originalSubs[i].timing,
-                            text: originalSubs[i].text,
-                            needsTranslation: true
-                        });
-                    }
-                }
-
-                if (needsTranslation) {
-                    showStatus('🌐 Extra lines translate කරනවා... කරුණාකර රැඳී සිටින්න', 'warning');
-                    
-                    const toTranslate = syncedSubs.filter(sub => sub.needsTranslation);
-                    let translated = 0;
-
-                    for (let sub of toTranslate) {
-                        sub.text = await translateText(sub.text);
-                        delete sub.needsTranslation;
-                        translated++;
-                        
-                        const progress = Math.round((translated / toTranslate.length) * 100);
-                        showStatus(`🌐 Translating... ${translated}/${toTranslate.length} (${progress}%)`, 'warning');
-                        
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                }
-
-                outputContent = syncedSubs.map(sub => 
-                    `${sub.index}\n${sub.timing}\n${sub.text}\n`
-                ).join('\n');
-
-                document.getElementById('previewText').textContent = outputContent.slice(0, 1000) + '\n...';
-                document.getElementById('previewBox').style.display = 'block';
-                document.getElementById('downloadBtn').style.display = 'inline-block';
-                
-                showStatus(`✅ සාර්ථකයි! Subtitles ${syncedSubs.length}ක් sync වුණා!`, 'success');
-            } catch (error) {
-                showStatus('❌ Error: ' + error.message, 'error');
-            } finally {
-                syncBtn.disabled = false;
-                syncBtn.textContent = '🔄 Sync කරන්න';
-            }
-        }
-
-        function downloadOutput() {
-            if (!outputContent) return;
-            
-            const blob = new Blob([outputContent], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'synced_subtitles.srt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function showStatus(message, type) {
-            const statusBox = document.getElementById('statusBox');
-            statusBox.textContent = message;
-            statusBox.className = 'status ' + type;
-            statusBox.style.display = 'block';
-        }
-    </script>
+    function showStatus(msg, type) {
+      const box = document.getElementById("statusBox");
+      box.textContent = msg;
+      box.className = "status " + type;
+      box.style.display = "block";
+    }
+  </script>
 </body>
 </html>
