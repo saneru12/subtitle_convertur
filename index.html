@@ -3,17 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subtitle Timing Synchronizer with Smart Matching</title>
+    <title>Subtitle Timing Synchronizer with Smart Matching (AI Enhanced)</title>
     <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
-    <!-- ✅ Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CLJE123NKC"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-CLJE123NKC');
-    </script>
-    
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
+
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
@@ -51,22 +45,20 @@
         .instructions h4 { color: #92400e; margin-bottom: 10px; font-size: clamp(14px, 3.5vw, 18px); }
         .instructions ol { color: #78350f; padding-left: 20px; font-size: clamp(12px, 3vw, 14px); }
         .instructions li { margin-bottom: 5px; }
-        .instructions p { font-size: clamp(11px, 2.5vw, 13px); }
+        .notice {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeeba;
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: clamp(12px, 3vw, 16px);
+        }
         input[type="file"] { display: none; }
         .icon { font-size: clamp(32px, 8vw, 48px); margin-bottom: 10px; }
         .checkmark { color: #10b981; font-size: clamp(16px, 4vw, 20px); margin-top: 10px; display: none; }
-        .notice {
-    background: #fff3cd;
-    color: #856404;
-    border: 2px solid #ffeeba;
-    border-radius: 10px;
-    padding: 10px 15px;
-    margin-bottom: 15px;
-    text-align: center;
-    font-weight: bold;
-    font-size: clamp(12px, 3vw, 16px);
-}
-
         #downloadBtn { display: none; }
         .optional-badge { display: inline-block; background: #fbbf24; color: white; padding: 3px 8px; border-radius: 12px; font-size: clamp(9px, 2vw, 11px); font-weight: bold; margin-left: 5px; }
     </style>
@@ -74,11 +66,11 @@
 <body>
     <div class="container">
         <div class="notice">
-    🧠 Smart Matching එකට බොහෝ වේලාවක් ගත වනු ඇත. කරුණාකර බලා සිටින්න...
-</div>
+            🧠 Smart Matching එකට බොහෝ වේලාවක් ගත වනු ඇත. කරුණාකර බලා සිටින්න...
+        </div>
 
-        <h1>🎬 Subtitle Smart Synchronizer</h1>
-        <p class="subtitle">Original timing + Sinhala translation smart matching</p>
+        <h1>🎬 Subtitle Smart Synchronizer (AI Enhanced)</h1>
+        <p class="subtitle">Original timing + Sinhala translation smart matching (AI powered)</p>
 
         <div class="upload-section">
             <div class="upload-box" id="originalBox" onclick="document.getElementById('originalFile').click()">
@@ -107,10 +99,9 @@
             <button class="btn btn-download" id="downloadBtn" onclick="downloadOutput()">⬇️ Download කරන්න</button>
         </div>
 
-        <!-- 🆕 Real-time Log Box -->
-        <div class="preview" id="logBox" style="display:none; background:#000; color:#0f0; max-height:200px; overflow-y:auto;">
+        <div class="preview" id="logBox" style="display:none; background:#000; color:#0f0;">
             <h3 style="color:white;">Live Log:</h3>
-            <pre id="logText" style="background:#000; color:#0f0; border:none; padding:5px; margin:0; white-space:pre-wrap;"></pre>
+            <pre id="logText"></pre>
         </div>
 
         <div class="preview" id="previewBox">
@@ -121,215 +112,124 @@
         <div class="instructions">
             <h4>📌 භාවිතා කරන ආකාරය:</h4>
             <ol>
-                <li>ඔයාට English sub එකක් sinhalata හරවන්න ඕන්නම් original subtitle තැනට sub එක දීල sync button එක ඔබන්න </li>
-                <li>Original subtitle file එක upload කරන්න (timing වලට)</li>
-                <li><strong>විකල්ප:</strong> Sinhala translated subtitle file එක upload කරන්න</li>
-                <li>"Smart Sync" button එක click කරන්න</li>
-                <li>System එක Original එකේ English සහ Translated එකේ Sinhala compare කරලා best match හොයාගෙන sync කරයි</li>
-                <li>Output file එක download කරන්න</li>
+                <li>Original subtitle එක upload කරන්න (timing සඳහා)</li>
+                <li>විකල්ප Sinhala subtitle එක upload කරන්න</li>
+                <li>"Smart Sync" ඔබන්න</li>
+                <li>AI එක meaning අනුව best Sinhala match එක හොයලා sync කරයි</li>
             </ol>
-            <p style="margin-top:10px;"><strong>🧠 Smart Matching:</strong> Original එකේ "Sara" කියල තියෙනවා නම්, Translated එකේ "සාරා" හොයාගෙන ඒක දානවා. Match එකක් හොයාගන්න බැරි නම් Google Translate use කරනවා!</p>
         </div>
     </div>
 
-    <script>
-        let originalContent = null;
-        let translatedContent = null;
-        let outputContent = null;
+<script>
+let model, originalContent = null, translatedContent = null, outputContent = null;
 
-        // 🆕 Real-time log function
-        function log(message) {
-            const logBox = document.getElementById("logBox");
-            const logText = document.getElementById("logText");
-            logBox.style.display = "block";
-            logText.textContent += message + "\n";
-            logBox.scrollTop = logBox.scrollHeight; // auto scroll
-        }
+function log(msg) {
+    const box = document.getElementById("logBox");
+    const text = document.getElementById("logText");
+    box.style.display = "block";
+    text.textContent += msg + "\n";
+    box.scrollTop = box.scrollHeight;
+}
 
-        document.getElementById('originalFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+async function loadModel() {
+    log("🧠 AI model load වෙනවා...");
+    model = await use.load();
+    log("✅ AI model load උනා!");
+}
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                originalContent = event.target.result;
-                document.getElementById('originalBox').classList.add('uploaded');
-                document.getElementById('originalCheck').style.display = 'block';
-                showStatus('Original subtitle ගොනුව upload වුණා ✓', 'success');
-                log("🟦 Original subtitle loaded");
-            };
-            reader.readAsText(file);
-        });
+function parseSRT(content) {
+    const blocks = content.trim().split(/\n\s*\n/);
+    return blocks.map(block => {
+        const lines = block.split('\n');
+        return { index: lines[0], timing: lines[1], text: lines.slice(2).join(' ') };
+    });
+}
 
-        document.getElementById('translatedFile').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+function cosineSimilarity(a, b) {
+    let dot = 0, magA = 0, magB = 0;
+    for (let i = 0; i < a.length; i++) {
+        dot += a[i] * b[i];
+        magA += a[i] * a[i];
+        magB += b[i] * b[i];
+    }
+    return dot / (Math.sqrt(magA) * Math.sqrt(magB));
+}
 
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                translatedContent = event.target.result;
-                document.getElementById('translatedBox').classList.add('uploaded');
-                document.getElementById('translatedCheck').style.display = 'block';
-                showStatus('Sinhala subtitle ගොනුව upload වුණා ✓', 'success');
-                log("🟩 Translated subtitle loaded");
-            };
-            reader.readAsText(file);
-        });
+async function smartMatch(originalSubs, translatedSubs) {
+    log("⚙️ AI embeddings generate වෙනවා...");
+    const origEmb = await model.embed(originalSubs.map(s => s.text));
+    const tranEmb = await model.embed(translatedSubs.map(s => s.text));
 
-        function parseSRT(content) {
-            const blocks = content.trim().split(/\n\s*\n/);
-            return blocks.map(block => {
-                const lines = block.split('\n');
-                const index = lines[0];
-                const timing = lines[1];
-                const text = lines.slice(2).join('\n');
-                return { index, timing, text };
-            });
-        }
+    const origArr = await origEmb.array();
+    const tranArr = await tranEmb.array();
 
-        function normalizeText(text) {
-            return text.toLowerCase().replace(/[.,!?;:"""''\-—()[\]{}]/g, '').replace(/\s+/g, ' ').trim();
-        }
-
-        function calculateSimilarity(str1, str2) {
-            const len1 = str1.length;
-            const len2 = str2.length;
-            if (len1 === 0) return len2;
-            if (len2 === 0) return len1;
-            let matches = 0;
-            const maxLen = Math.max(len1, len2);
-            for (let i = 0; i < Math.min(len1, len2); i++) {
-                if (str1[i] === str2[i]) matches++;
-            }
-            return matches / maxLen;
-        }
-
-        async function translateText(text) {
-            try {
-                const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`);
-                const data = await response.json();
-                if (data && data[0] && data[0][0] && data[0][0][0]) {
-                    let translatedText = data[0][0][0];
-                    translatedText = makeSinhalaConversational(translatedText);
-                    return translatedText;
-                }
-                return text;
-            } catch (error) {
-                console.error('Translation error:', error);
-                return text;
+    const result = [];
+    for (let i = 0; i < translatedSubs.length; i++) {
+        let bestIdx = 0, bestScore = -1;
+        for (let j = 0; j < originalSubs.length; j++) {
+            const score = cosineSimilarity(tranArr[i], origArr[j]);
+            if (score > bestScore) {
+                bestScore = score;
+                bestIdx = j;
             }
         }
+        result.push({ index: i + 1, timing: originalSubs[bestIdx].timing, text: translatedSubs[i].text });
+        log(`🔍 Sinhala line ${i+1} → Original line ${bestIdx+1} (score: ${bestScore.toFixed(2)})`);
+    }
+    return result;
+}
 
-        function makeSinhalaConversational(text) {
-            let result = text;
-            const conversions = {
-                'ඇත': 'තියෙනවා','නැත': 'නෑ','ඔබ': 'ඔයා','ඔහු': 'එයා','ඇය': 'එයා','එය': 'ඒක','මෙය': 'මේක',
-                'කරනු ලැබේ': 'කරනවා','ලැබේ': 'ලැබෙනවා','වේ': 'වෙනවා','විය': 'උනා','කළ': 'කළා','යනවා': 'යනවා',
-                'එනවා': 'එනවා','ඇත්තේ': 'තියෙන්නේ','කරමි': 'කරනවා','යමි': 'යනවා','එමි': 'එනවා','කළෙමි': 'කළා',
-                'ගියෙමි': 'ගියා','ආවෙමි': 'ආවා','ඔබට': 'ඔයාට'
-            };
-            for (const [formal, informal] of Object.entries(conversions)) {
-                const regex = new RegExp('\\b' + formal + '\\b', 'g');
-                result = result.replace(regex, informal);
-            }
-            result = result.replace(/ය$/g, '');
-            return result;
-        }
+document.getElementById('originalFile').addEventListener('change', e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        originalContent = ev.target.result;
+        document.getElementById('originalBox').classList.add('uploaded');
+        document.getElementById('originalCheck').style.display = 'block';
+        log("🟦 Original file loaded");
+    };
+    reader.readAsText(e.target.files[0]);
+});
 
-        async function findBestMatch(originalText, translatedSubs, usedIndices) {
-            let bestMatch = null, bestScore = 0, bestIndex = -1;
-            const normalizedOriginal = normalizeText(originalText);
-            for (let i = 0; i < translatedSubs.length; i++) {
-                if (usedIndices.has(i)) continue;
-                const translatedText = translatedSubs[i].text;
-                const tempTranslation = await translateText(originalText);
-                const normalizedTranslation = normalizeText(tempTranslation);
-                const normalizedTranslated = normalizeText(translatedText);
-                const similarity = calculateSimilarity(normalizedTranslation, normalizedTranslated);
-                if (similarity > bestScore) { bestScore = similarity; bestMatch = translatedText; bestIndex = i; }
-                if (similarity > 0.7) break;
-            }
-            if (bestScore > 0.4 && bestIndex !== -1) { usedIndices.add(bestIndex); return bestMatch; }
-            return null;
-        }
+document.getElementById('translatedFile').addEventListener('change', e => {
+    const reader = new FileReader();
+    reader.onload = ev => {
+        translatedContent = ev.target.result;
+        document.getElementById('translatedBox').classList.add('uploaded');
+        document.getElementById('translatedCheck').style.display = 'block';
+        log("🟩 Sinhala file loaded");
+    };
+    reader.readAsText(e.target.files[0]);
+});
 
-        async function syncSubtitles() {
-            if (!originalContent) { showStatus('⚠️ Original subtitle file එක upload කරන්න!', 'error'); return; }
-            const syncBtn = document.getElementById('syncBtn');
-            syncBtn.disabled = true;
-            syncBtn.textContent = '⏳ Processing...';
-            document.getElementById("logText").textContent = "";
+async function syncSubtitles() {
+    const syncBtn = document.getElementById("syncBtn");
+    syncBtn.disabled = true;
+    syncBtn.textContent = "⏳ Processing...";
+    document.getElementById("logText").textContent = "";
 
-            try {
-                const originalSubs = parseSRT(originalContent);
-                let translatedSubs = [];
-                log("🟦 Original subtitles loaded: " + originalSubs.length);
-                if (translatedContent) {
-                    translatedSubs = parseSRT(translatedContent);
-                    log("🟩 Translated subtitles loaded: " + translatedSubs.length);
-                    showStatus(`📚 Translated subtitles ${translatedSubs.length}ක් load වුණා`, 'success');
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                }
+    const originalSubs = parseSRT(originalContent);
+    const translatedSubs = parseSRT(translatedContent);
+    if (!model) await loadModel();
 
-                const syncedSubs = [];
-                const usedIndices = new Set();
-                showStatus('🔄 Smart matching කරනවා...', 'warning');
-                log("🔄 Smart matching process started...");
+    log("🚀 Smart matching start!");
+    const merged = await smartMatch(originalSubs, translatedSubs);
 
-                for (let i = 0; i < originalSubs.length; i++) {
-                    const originalSub = originalSubs[i];
-                    let finalText = null;
+    outputContent = merged.map(s => `${s.index}\n${s.timing}\n${s.text}\n`).join("\n");
+    document.getElementById('previewText').textContent = outputContent.slice(0, 1000) + '...';
+    document.getElementById('previewBox').style.display = 'block';
+    document.getElementById('downloadBtn').style.display = 'inline-block';
+    log("✅ Smart matching complete!");
+    syncBtn.disabled = false;
+    syncBtn.textContent = "🔄 Smart Sync කරන්න";
+}
 
-                    log(`➡️ Processing subtitle ${i + 1}/${originalSubs.length}`);
-                    log("Original: " + originalSub.text.replace(/\n/g, " "));
-
-                    if (translatedSubs.length > 0) {
-                        log("🧠 Finding best match...");
-                        finalText = await findBestMatch(originalSub.text, translatedSubs, usedIndices);
-                        if (finalText) log("✅ Matched from translated file");
-                    }
-
-                    if (!finalText) { log("🌐 No match found — translating via Google..."); finalText = await translateText(originalSub.text); }
-
-                    syncedSubs.push({ index: i + 1, timing: originalSub.timing, text: finalText });
-                    log("✔️ Done -> " + finalText.replace(/\n/g, " ").slice(0, 60) + "...");
-                    log("---------------------------------------");
-                    await new Promise(resolve => setTimeout(resolve, 200));
-                }
-
-                outputContent = syncedSubs.map(sub => `${sub.index}\n${sub.timing}\n${sub.text}\n`).join('\n');
-
-                document.getElementById('previewText').textContent = outputContent.slice(0, 1000) + '\n...';
-                document.getElementById('previewBox').style.display = 'block';
-                document.getElementById('downloadBtn').style.display = 'inline-block';
-                showStatus(`✅ සාර්ථකයි! Subtitles ${syncedSubs.length}ක් smart sync වුණා!`, 'success');
-                log("🏁 Smart sync completed successfully!");
-            } catch (error) {
-                showStatus('❌ Error: ' + error.message, 'error');
-                log("❌ Error occurred: " + error.message);
-            } finally {
-                syncBtn.disabled = false;
-                syncBtn.textContent = '🔄 Smart Sync කරන්න';
-            }
-        }
-
-        function downloadOutput() {
-            if (!outputContent) return;
-            const blob = new Blob([outputContent], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'synced_subtitles.srt';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function showStatus(message, type) {
-            const statusBox = document.getElementById('statusBox');
-            statusBox.textContent = message;
-            statusBox.className = 'status ' + type;
-            statusBox.style.display = 'block';
-        }
-    </script>
+function downloadOutput() {
+    const blob = new Blob([outputContent], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'SmartSynced_AI_Subtitles.srt';
+    a.click();
+}
+</script>
 </body>
 </html>
