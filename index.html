@@ -443,7 +443,7 @@
                 // Check if translated subtitle overlaps or is very close to original
                 const isOverlapping = 
                     (transSub.startTime <= originalSub.endTime && transSub.endTime >= originalSub.startTime) ||
-                    (Math.abs(transMidpoint - originalMidpoint) < 2); // Within 2 seconds
+                    (Math.abs(transMidpoint - originalMidpoint) < 3); // Within 3 seconds for flexibility
                 
                 if (isOverlapping) {
                     matches.push({ index: i, sub: transSub, midpoint: transMidpoint });
@@ -453,6 +453,25 @@
             // Sort by midpoint to maintain order
             matches.sort((a, b) => a.midpoint - b.midpoint);
             return matches;
+        }
+
+        function findClosestUnusedTranslation(originalSub, translatedSubs, usedIndices) {
+            let closest = null;
+            let minDistance = Infinity;
+            
+            for (let i = 0; i < translatedSubs.length; i++) {
+                if (usedIndices.has(i)) continue;
+                
+                const transSub = translatedSubs[i];
+                const distance = Math.abs(transSub.startTime - originalSub.startTime);
+                
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    closest = { index: i, sub: transSub };
+                }
+            }
+            
+            return closest;
         }
 
         async function translateText(text) {
@@ -517,7 +536,7 @@
                     const originalSub = originalSubs[i];
                     
                     if (translatedSubs.length > 0) {
-                        // Find all matching translated subtitles based on timing
+                        // Find all matching translated subtitles based on timing overlap
                         const matches = findMatchingTranslations(originalSub, translatedSubs, usedIndices);
                         
                         if (matches.length > 0) {
@@ -531,14 +550,27 @@
                                 text: mergedText
                             });
                         } else {
-                            // No match found, needs translation
-                            needsTranslation = true;
-                            syncedSubs.push({
-                                index: i + 1,
-                                timing: originalSub.timing,
-                                text: originalSub.text,
-                                needsTranslation: true
-                            });
+                            // No overlap match, try finding closest unused translation
+                            const closest = findClosestUnusedTranslation(originalSub, translatedSubs, usedIndices);
+                            
+                            if (closest && Math.abs(closest.sub.startTime - originalSub.startTime) < 10) {
+                                // Use closest if within 10 seconds
+                                usedIndices.add(closest.index);
+                                syncedSubs.push({
+                                    index: i + 1,
+                                    timing: originalSub.timing,
+                                    text: closest.sub.text
+                                });
+                            } else {
+                                // Too far or no translation available, needs translation
+                                needsTranslation = true;
+                                syncedSubs.push({
+                                    index: i + 1,
+                                    timing: originalSub.timing,
+                                    text: originalSub.text,
+                                    needsTranslation: true
+                                });
+                            }
                         }
                     } else {
                         // No translated file, needs translation
