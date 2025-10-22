@@ -15,250 +15,48 @@
     </script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 10px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: clamp(20px, 5vw, 32px);
-        }
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 20px;
-            font-size: clamp(12px, 3vw, 16px);
-            padding: 0 10px;
-        }
-        .upload-section {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        @media (min-width: 640px) {
-            .container {
-                padding: 40px;
-            }
-            .upload-section {
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-                margin-bottom: 30px;
-            }
-        }
-        .upload-box {
-            border: 3px dashed #667eea;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .upload-box:hover {
-            border-color: #764ba2;
-            background: #f8f9ff;
-        }
-        .upload-box.uploaded {
-            border-color: #10b981;
-            background: #f0fdf4;
-        }
-        .upload-box h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: clamp(16px, 4vw, 20px);
-        }
-        .upload-box p {
-            color: #666;
-            font-size: clamp(12px, 3vw, 14px);
-            margin-bottom: 15px;
-        }
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 10px;
-            font-size: clamp(14px, 3vw, 16px);
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        @media (min-width: 640px) {
-            .btn {
-                padding: 12px 30px;
-            }
-        }
-        .btn-upload {
-            background: #667eea;
-            color: white;
-        }
-        .btn-upload:hover {
-            background: #5568d3;
-        }
-        .btn-sync {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            font-size: clamp(14px, 4vw, 18px);
-            padding: 12px 25px;
-            width: 100%;
-        }
-        @media (min-width: 640px) {
-            .btn-sync {
-                padding: 15px 40px;
-                width: auto;
-            }
-        }
-        .btn-sync:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-        }
-        .btn-sync:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .btn-download {
-            background: #10b981;
-            color: white;
-            font-size: clamp(14px, 4vw, 18px);
-            padding: 12px 25px;
-            width: 100%;
-        }
-        @media (min-width: 640px) {
-            .btn-download {
-                padding: 15px 40px;
-                width: auto;
-            }
-        }
-        .btn-download:hover {
-            background: #059669;
-        }
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        @media (min-width: 640px) {
-            .button-group {
-                flex-direction: row;
-                gap: 15px;
-            }
-        }
-        .status {
-            background: #eff6ff;
-            border: 2px solid #3b82f6;
-            border-radius: 10px;
-            padding: 12px;
-            text-align: center;
-            margin-bottom: 15px;
-            font-weight: bold;
-            color: #1e40af;
-            font-size: clamp(12px, 3vw, 16px);
-        }
-        .status.success {
-            background: #f0fdf4;
-            border-color: #10b981;
-            color: #065f46;
-        }
-        .status.error {
-            background: #fef2f2;
-            border-color: #ef4444;
-            color: #991b1b;
-        }
-        .status.warning {
-            background: #fffbeb;
-            border-color: #f59e0b;
-            color: #92400e;
-        }
-        .preview {
-            background: #f9fafb;
-            border: 2px solid #e5e7eb;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            display: none;
-        }
-        .preview h3 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: clamp(16px, 4vw, 20px);
-        }
-        .preview pre {
-            background: white;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #e5e7eb;
-            max-height: 250px;
-            overflow-y: auto;
-            font-size: clamp(10px, 2.5vw, 12px);
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .instructions {
-            background: #fef3c7;
-            border: 2px solid #fbbf24;
-            border-radius: 10px;
-            padding: 15px;
-        }
-        .instructions h4 {
-            color: #92400e;
-            margin-bottom: 10px;
-            font-size: clamp(14px, 3.5vw, 18px);
-        }
-        .instructions ol {
-            color: #78350f;
-            padding-left: 20px;
-            font-size: clamp(12px, 3vw, 14px);
-        }
-        .instructions li {
-            margin-bottom: 5px;
-        }
-        .instructions p {
-            font-size: clamp(11px, 2.5vw, 13px);
-        }
-        input[type="file"] {
-            display: none;
-        }
-        .icon {
-            font-size: clamp(32px, 8vw, 48px);
-            margin-bottom: 10px;
-        }
-        .checkmark {
-            color: #10b981;
-            font-size: clamp(16px, 4vw, 20px);
-            margin-top: 10px;
-            display: none;
-        }
-        #downloadBtn {
-            display: none;
-        }
-        .optional-badge {
-            display: inline-block;
-            background: #fbbf24;
-            color: white;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-size: clamp(9px, 2vw, 11px);
-            font-weight: bold;
-            margin-left: 5px;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 20px; }
+        h1 { text-align: center; color: #333; margin-bottom: 10px; font-size: clamp(20px, 5vw, 32px); }
+        .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: clamp(12px, 3vw, 16px); padding: 0 10px; }
+        .upload-section { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
+        @media (min-width: 640px) { .container { padding: 40px; } .upload-section { grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; } }
+        .upload-box { border: 3px dashed #667eea; border-radius: 15px; padding: 20px; text-align: center; transition: all 0.3s; cursor: pointer; }
+        .upload-box:hover { border-color: #764ba2; background: #f8f9ff; }
+        .upload-box.uploaded { border-color: #10b981; background: #f0fdf4; }
+        .upload-box h3 { color: #333; margin-bottom: 10px; font-size: clamp(16px, 4vw, 20px); }
+        .upload-box p { color: #666; font-size: clamp(12px, 3vw, 14px); margin-bottom: 15px; }
+        .btn { padding: 10px 20px; border: none; border-radius: 10px; font-size: clamp(14px, 3vw, 16px); font-weight: bold; cursor: pointer; transition: all 0.3s; }
+        @media (min-width: 640px) { .btn { padding: 12px 30px; } }
+        .btn-upload { background: #667eea; color: white; }
+        .btn-upload:hover { background: #5568d3; }
+        .btn-sync { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: clamp(14px, 4vw, 18px); padding: 12px 25px; width: 100%; }
+        @media (min-width: 640px) { .btn-sync { padding: 15px 40px; width: auto; } }
+        .btn-sync:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .btn-sync:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-download { background: #10b981; color: white; font-size: clamp(14px, 4vw, 18px); padding: 12px 25px; width: 100%; }
+        @media (min-width: 640px) { .btn-download { padding: 15px 40px; width: auto; } }
+        .btn-download:hover { background: #059669; }
+        .button-group { display: flex; flex-direction: column; gap: 10px; justify-content: center; margin-bottom: 20px; }
+        @media (min-width: 640px) { .button-group { flex-direction: row; gap: 15px; } }
+        .status { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 15px; font-weight: bold; color: #1e40af; font-size: clamp(12px, 3vw, 16px); }
+        .status.success { background: #f0fdf4; border-color: #10b981; color: #065f46; }
+        .status.error { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
+        .status.warning { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
+        .preview { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: none; }
+        .preview h3 { color: #333; margin-bottom: 10px; font-size: clamp(16px, 4vw, 20px); }
+        .preview pre { background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; max-height: 250px; overflow-y: auto; font-size: clamp(10px, 2.5vw, 12px); white-space: pre-wrap; word-break: break-word; }
+        .instructions { background: #fef3c7; border: 2px solid #fbbf24; border-radius: 10px; padding: 15px; }
+        .instructions h4 { color: #92400e; margin-bottom: 10px; font-size: clamp(14px, 3.5vw, 18px); }
+        .instructions ol { color: #78350f; padding-left: 20px; font-size: clamp(12px, 3vw, 14px); }
+        .instructions li { margin-bottom: 5px; }
+        .instructions p { font-size: clamp(11px, 2.5vw, 13px); }
+        input[type="file"] { display: none; }
+        .icon { font-size: clamp(32px, 8vw, 48px); margin-bottom: 10px; }
+        .checkmark { color: #10b981; font-size: clamp(16px, 4vw, 20px); margin-top: 10px; display: none; }
+        #downloadBtn { display: none; }
+        .optional-badge { display: inline-block; background: #fbbf24; color: white; padding: 3px 8px; border-radius: 12px; font-size: clamp(9px, 2vw, 11px); font-weight: bold; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -293,6 +91,12 @@
             <button class="btn btn-download" id="downloadBtn" onclick="downloadOutput()">⬇️ Download කරන්න</button>
         </div>
 
+        <!-- 🆕 Real-time Log Box -->
+        <div class="preview" id="logBox" style="display:none; background:#000; color:#0f0; max-height:200px; overflow-y:auto;">
+            <h3 style="color:white;">Live Log:</h3>
+            <pre id="logText" style="background:#000; color:#0f0; border:none; padding:5px; margin:0; white-space:pre-wrap;"></pre>
+        </div>
+
         <div class="preview" id="previewBox">
             <h3>Preview:</h3>
             <pre id="previewText"></pre>
@@ -316,6 +120,15 @@
         let translatedContent = null;
         let outputContent = null;
 
+        // 🆕 Real-time log function
+        function log(message) {
+            const logBox = document.getElementById("logBox");
+            const logText = document.getElementById("logText");
+            logBox.style.display = "block";
+            logText.textContent += message + "\n";
+            logBox.scrollTop = logBox.scrollHeight; // auto scroll
+        }
+
         document.getElementById('originalFile').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -326,6 +139,7 @@
                 document.getElementById('originalBox').classList.add('uploaded');
                 document.getElementById('originalCheck').style.display = 'block';
                 showStatus('Original subtitle ගොනුව upload වුණා ✓', 'success');
+                log("🟦 Original subtitle loaded");
             };
             reader.readAsText(file);
         });
@@ -340,6 +154,7 @@
                 document.getElementById('translatedBox').classList.add('uploaded');
                 document.getElementById('translatedCheck').style.display = 'block';
                 showStatus('Sinhala subtitle ගොනුව upload වුණා ✓', 'success');
+                log("🟩 Translated subtitle loaded");
             };
             reader.readAsText(file);
         });
@@ -356,29 +171,19 @@
         }
 
         function normalizeText(text) {
-            // Normalize text for comparison: lowercase, remove punctuation, trim
-            return text.toLowerCase()
-                .replace(/[.,!?;:"""''\-—()[\]{}]/g, '')
-                .replace(/\s+/g, ' ')
-                .trim();
+            return text.toLowerCase().replace(/[.,!?;:"""''\-—()[\]{}]/g, '').replace(/\s+/g, ' ').trim();
         }
 
         function calculateSimilarity(str1, str2) {
-            // Simple similarity calculation using Levenshtein-like approach
             const len1 = str1.length;
             const len2 = str2.length;
-            
             if (len1 === 0) return len2;
             if (len2 === 0) return len1;
-            
-            // Calculate character overlap
             let matches = 0;
             const maxLen = Math.max(len1, len2);
-            
             for (let i = 0; i < Math.min(len1, len2); i++) {
                 if (str1[i] === str2[i]) matches++;
             }
-            
             return matches / maxLen;
         }
 
@@ -386,7 +191,6 @@
             try {
                 const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`);
                 const data = await response.json();
-                
                 if (data && data[0] && data[0][0] && data[0][0][0]) {
                     let translatedText = data[0][0][0];
                     translatedText = makeSinhalaConversational(translatedText);
@@ -395,164 +199,97 @@
                 return text;
             } catch (error) {
                 console.error('Translation error:', error);
-                try {
-                    const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|si`);
-                    const data = await response.json();
-                    if (data.responseStatus === 200) {
-                        let translatedText = data.responseData.translatedText;
-                        translatedText = makeSinhalaConversational(translatedText);
-                        return translatedText;
-                    }
-                } catch (e) {
-                    console.error('Fallback translation error:', e);
-                }
                 return text;
             }
         }
 
         function makeSinhalaConversational(text) {
             let result = text;
-            
             const conversions = {
-                'ඇත': 'තියෙනවා',
-                'නැත': 'නෑ',
-                'ඔබ': 'ඔයා',
-                'ඔහු': 'එයා',
-                'ඇය': 'එයා',
-                'එය': 'ඒක',
-                'මෙය': 'මේක',
-                'කරනු ලැබේ': 'කරනවා',
-                'ලැබේ': 'ලැබෙනවා',
-                'වේ': 'වෙනවා',
-                'විය': 'උනා',
-                'කළ': 'කළා',
-                'යනවා': 'යනවා',
-                'එනවා': 'එනවා',
-                'ඇත්තේ': 'තියෙන්නේ',
-                'කරමි': 'කරනවා',
-                'යමි': 'යනවා',
-                'එමි': 'එනවා',
-                'කළෙමි': 'කළා',
-                'ගියෙමි': 'ගියා',
-                'ආවෙමි': 'ආවා',
-                'ඔබට': 'ඔයාට'
+                'ඇත': 'තියෙනවා','නැත': 'නෑ','ඔබ': 'ඔයා','ඔහු': 'එයා','ඇය': 'එයා','එය': 'ඒක','මෙය': 'මේක',
+                'කරනු ලැබේ': 'කරනවා','ලැබේ': 'ලැබෙනවා','වේ': 'වෙනවා','විය': 'උනා','කළ': 'කළා','යනවා': 'යනවා',
+                'එනවා': 'එනවා','ඇත්තේ': 'තියෙන්නේ','කරමි': 'කරනවා','යමි': 'යනවා','එමි': 'එනවා','කළෙමි': 'කළා',
+                'ගියෙමි': 'ගියා','ආවෙමි': 'ආවා','ඔබට': 'ඔයාට'
             };
-
             for (const [formal, informal] of Object.entries(conversions)) {
                 const regex = new RegExp('\\b' + formal + '\\b', 'g');
                 result = result.replace(regex, informal);
             }
-
             result = result.replace(/ය$/g, '');
-            
             return result;
         }
 
         async function findBestMatch(originalText, translatedSubs, usedIndices) {
-            // Try to find the best matching translated subtitle for the original text
-            let bestMatch = null;
-            let bestScore = 0;
-            let bestIndex = -1;
-
+            let bestMatch = null, bestScore = 0, bestIndex = -1;
             const normalizedOriginal = normalizeText(originalText);
-
-            // First, try exact or close matches with translated texts
             for (let i = 0; i < translatedSubs.length; i++) {
                 if (usedIndices.has(i)) continue;
-
                 const translatedText = translatedSubs[i].text;
-                
-                // Translate the original to Sinhala and compare
                 const tempTranslation = await translateText(originalText);
                 const normalizedTranslation = normalizeText(tempTranslation);
                 const normalizedTranslated = normalizeText(translatedText);
-
-                // Calculate similarity
                 const similarity = calculateSimilarity(normalizedTranslation, normalizedTranslated);
-
-                if (similarity > bestScore) {
-                    bestScore = similarity;
-                    bestMatch = translatedText;
-                    bestIndex = i;
-                }
-
-                // If very high match, use it immediately
-                if (similarity > 0.7) {
-                    break;
-                }
+                if (similarity > bestScore) { bestScore = similarity; bestMatch = translatedText; bestIndex = i; }
+                if (similarity > 0.7) break;
             }
-
-            // If we found a decent match, use it
-            if (bestScore > 0.4 && bestIndex !== -1) {
-                usedIndices.add(bestIndex);
-                return bestMatch;
-            }
-
-            // Otherwise, return null to indicate we should translate
+            if (bestScore > 0.4 && bestIndex !== -1) { usedIndices.add(bestIndex); return bestMatch; }
             return null;
         }
 
         async function syncSubtitles() {
-            if (!originalContent) {
-                showStatus('⚠️ Original subtitle file එක upload කරන්න!', 'error');
-                return;
-            }
-
+            if (!originalContent) { showStatus('⚠️ Original subtitle file එක upload කරන්න!', 'error'); return; }
             const syncBtn = document.getElementById('syncBtn');
             syncBtn.disabled = true;
             syncBtn.textContent = '⏳ Processing...';
+            document.getElementById("logText").textContent = "";
 
             try {
                 const originalSubs = parseSRT(originalContent);
                 let translatedSubs = [];
-                
+                log("🟦 Original subtitles loaded: " + originalSubs.length);
                 if (translatedContent) {
                     translatedSubs = parseSRT(translatedContent);
+                    log("🟩 Translated subtitles loaded: " + translatedSubs.length);
                     showStatus(`📚 Translated subtitles ${translatedSubs.length}ක් load වුණා`, 'success');
                     await new Promise(resolve => setTimeout(resolve, 500));
                 }
 
                 const syncedSubs = [];
                 const usedIndices = new Set();
-
                 showStatus('🔄 Smart matching කරනවා...', 'warning');
+                log("🔄 Smart matching process started...");
 
                 for (let i = 0; i < originalSubs.length; i++) {
                     const originalSub = originalSubs[i];
                     let finalText = null;
 
-                    // If we have translated subtitles, try to find a match
+                    log(`➡️ Processing subtitle ${i + 1}/${originalSubs.length}`);
+                    log("Original: " + originalSub.text.replace(/\n/g, " "));
+
                     if (translatedSubs.length > 0) {
-                        showStatus(`🧠 Matching ${i + 1}/${originalSubs.length}...`, 'warning');
+                        log("🧠 Finding best match...");
                         finalText = await findBestMatch(originalSub.text, translatedSubs, usedIndices);
+                        if (finalText) log("✅ Matched from translated file");
                     }
 
-                    // If no match found or no translated file, translate using Google
-                    if (!finalText) {
-                        showStatus(`🌐 Translating ${i + 1}/${originalSubs.length}...`, 'warning');
-                        finalText = await translateText(originalSub.text);
-                    }
+                    if (!finalText) { log("🌐 No match found — translating via Google..."); finalText = await translateText(originalSub.text); }
 
-                    syncedSubs.push({
-                        index: i + 1,
-                        timing: originalSub.timing,
-                        text: finalText
-                    });
-
+                    syncedSubs.push({ index: i + 1, timing: originalSub.timing, text: finalText });
+                    log("✔️ Done -> " + finalText.replace(/\n/g, " ").slice(0, 60) + "...");
+                    log("---------------------------------------");
                     await new Promise(resolve => setTimeout(resolve, 200));
                 }
 
-                outputContent = syncedSubs.map(sub => 
-                    `${sub.index}\n${sub.timing}\n${sub.text}\n`
-                ).join('\n');
+                outputContent = syncedSubs.map(sub => `${sub.index}\n${sub.timing}\n${sub.text}\n`).join('\n');
 
                 document.getElementById('previewText').textContent = outputContent.slice(0, 1000) + '\n...';
                 document.getElementById('previewBox').style.display = 'block';
                 document.getElementById('downloadBtn').style.display = 'inline-block';
-                
                 showStatus(`✅ සාර්ථකයි! Subtitles ${syncedSubs.length}ක් smart sync වුණා!`, 'success');
+                log("🏁 Smart sync completed successfully!");
             } catch (error) {
                 showStatus('❌ Error: ' + error.message, 'error');
+                log("❌ Error occurred: " + error.message);
             } finally {
                 syncBtn.disabled = false;
                 syncBtn.textContent = '🔄 Smart Sync කරන්න';
@@ -561,7 +298,6 @@
 
         function downloadOutput() {
             if (!outputContent) return;
-            
             const blob = new Blob([outputContent], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
