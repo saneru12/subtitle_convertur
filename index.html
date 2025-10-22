@@ -1,235 +1,208 @@
 <!DOCTYPE html>
 <html lang="si">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subtitle Timing Synchronizer with Smart Matching (AI Enhanced)</title>
-    <link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
-
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 10px; }
-        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 20px; }
-        h1 { text-align: center; color: #333; margin-bottom: 10px; font-size: clamp(20px, 5vw, 32px); }
-        .subtitle { text-align: center; color: #666; margin-bottom: 20px; font-size: clamp(12px, 3vw, 16px); padding: 0 10px; }
-        .upload-section { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
-        @media (min-width: 640px) { .container { padding: 40px; } .upload-section { grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; } }
-        .upload-box { border: 3px dashed #667eea; border-radius: 15px; padding: 20px; text-align: center; transition: all 0.3s; cursor: pointer; }
-        .upload-box:hover { border-color: #764ba2; background: #f8f9ff; }
-        .upload-box.uploaded { border-color: #10b981; background: #f0fdf4; }
-        .upload-box h3 { color: #333; margin-bottom: 10px; font-size: clamp(16px, 4vw, 20px); }
-        .upload-box p { color: #666; font-size: clamp(12px, 3vw, 14px); margin-bottom: 15px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 10px; font-size: clamp(14px, 3vw, 16px); font-weight: bold; cursor: pointer; transition: all 0.3s; }
-        @media (min-width: 640px) { .btn { padding: 12px 30px; } }
-        .btn-upload { background: #667eea; color: white; }
-        .btn-upload:hover { background: #5568d3; }
-        .btn-sync { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: clamp(14px, 4vw, 18px); padding: 12px 25px; width: 100%; }
-        @media (min-width: 640px) { .btn-sync { padding: 15px 40px; width: auto; } }
-        .btn-sync:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        .btn-sync:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-        .btn-download { background: #10b981; color: white; font-size: clamp(14px, 4vw, 18px); padding: 12px 25px; width: 100%; }
-        @media (min-width: 640px) { .btn-download { padding: 15px 40px; width: auto; } }
-        .btn-download:hover { background: #059669; }
-        .button-group { display: flex; flex-direction: column; gap: 10px; justify-content: center; margin-bottom: 20px; }
-        @media (min-width: 640px) { .button-group { flex-direction: row; gap: 15px; } }
-        .status { background: #eff6ff; border: 2px solid #3b82f6; border-radius: 10px; padding: 12px; text-align: center; margin-bottom: 15px; font-weight: bold; color: #1e40af; font-size: clamp(12px, 3vw, 16px); }
-        .status.success { background: #f0fdf4; border-color: #10b981; color: #065f46; }
-        .status.error { background: #fef2f2; border-color: #ef4444; color: #991b1b; }
-        .status.warning { background: #fffbeb; border-color: #f59e0b; color: #92400e; }
-        .preview { background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 10px; padding: 15px; margin-bottom: 15px; display: none; }
-        .preview h3 { color: #333; margin-bottom: 10px; font-size: clamp(16px, 4vw, 20px); }
-        .preview pre { background: white; padding: 12px; border-radius: 8px; border: 1px solid #e5e7eb; max-height: 250px; overflow-y: auto; font-size: clamp(10px, 2.5vw, 12px); white-space: pre-wrap; word-break: break-word; }
-        .instructions { background: #fef3c7; border: 2px solid #fbbf24; border-radius: 10px; padding: 15px; }
-        .instructions h4 { color: #92400e; margin-bottom: 10px; font-size: clamp(14px, 3.5vw, 18px); }
-        .instructions ol { color: #78350f; padding-left: 20px; font-size: clamp(12px, 3vw, 14px); }
-        .instructions li { margin-bottom: 5px; }
-        .notice {
-            background: #fff3cd;
-            color: #856404;
-            border: 2px solid #ffeeba;
-            border-radius: 10px;
-            padding: 10px 15px;
-            margin-bottom: 15px;
-            text-align: center;
-            font-weight: bold;
-            font-size: clamp(12px, 3vw, 16px);
-        }
-        input[type="file"] { display: none; }
-        .icon { font-size: clamp(32px, 8vw, 48px); margin-bottom: 10px; }
-        .checkmark { color: #10b981; font-size: clamp(16px, 4vw, 20px); margin-top: 10px; display: none; }
-        #downloadBtn { display: none; }
-        .optional-badge { display: inline-block; background: #fbbf24; color: white; padding: 3px 8px; border-radius: 12px; font-size: clamp(9px, 2vw, 11px); font-weight: bold; margin-left: 5px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subtitle Timing Synchronizer with Spoken Sinhala</title>
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/727/727245.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;padding:10px;}
+.container{max-width:900px;margin:0 auto;background:white;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.3);padding:20px;}
+h1{text-align:center;color:#333;margin-bottom:10px;font-size:clamp(20px,5vw,32px);}
+.subtitle{text-align:center;color:#666;margin-bottom:20px;font-size:clamp(12px,3vw,16px);padding:0 10px;}
+.upload-section{display:grid;grid-template-columns:1fr;gap:15px;margin-bottom:20px;}
+@media(min-width:640px){.container{padding:40px}.upload-section{grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px}}
+.upload-box{border:3px dashed #667eea;border-radius:15px;padding:20px;text-align:center;transition:all .3s;cursor:pointer;}
+.upload-box:hover{border-color:#764ba2;background:#f8f9ff;}
+.upload-box.uploaded{border-color:#10b981;background:#f0fdf4;}
+.upload-box h3{color:#333;margin-bottom:10px;font-size:clamp(16px,4vw,20px);}
+.upload-box p{color:#666;font-size:clamp(12px,3vw,14px);margin-bottom:15px;}
+.btn{padding:10px 20px;border:none;border-radius:10px;font-size:clamp(14px,3vw,16px);font-weight:bold;cursor:pointer;transition:all .3s;}
+@media(min-width:640px){.btn{padding:12px 30px}}
+.btn-upload{background:#667eea;color:white;}
+.btn-upload:hover{background:#5568d3;}
+.btn-sync{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:white;font-size:clamp(14px,4vw,18px);padding:12px 25px;width:100%;}
+@media(min-width:640px){.btn-sync{padding:15px 40px;width:auto}}
+.btn-sync:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,0.2);}
+.btn-sync:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-download{background:#10b981;color:white;font-size:clamp(14px,4vw,18px);padding:12px 25px;width:100%;}
+@media(min-width:640px){.btn-download{padding:15px 40px;width:auto}}
+.btn-download:hover{background:#059669;}
+.button-group{display:flex;flex-direction:column;gap:10px;justify-content:center;margin-bottom:20px;}
+@media(min-width:640px){.button-group{flex-direction:row;gap:15px}}
+.status{background:#eff6ff;border:2px solid #3b82f6;border-radius:10px;padding:12px;text-align:center;margin-bottom:15px;font-weight:bold;color:#1e40af;font-size:clamp(12px,3vw,16px);}
+.status.success{background:#f0fdf4;border-color:#10b981;color:#065f46;}
+.status.error{background:#fef2f2;border-color:#ef4444;color:#991b1b;}
+.status.warning{background:#fffbeb;border-color:#f59e0b;color:#92400e;}
+.preview{background:#f9fafb;border:2px solid #e5e7eb;border-radius:10px;padding:15px;margin-bottom:15px;display:none;}
+.preview h3{color:#333;margin-bottom:10px;font-size:clamp(16px,4vw,20px);}
+.preview pre{background:white;padding:12px;border-radius:8px;border:1px solid #e5e7eb;max-height:250px;overflow-y:auto;font-size:clamp(10px,2.5vw,12px);white-space:pre-wrap;word-break:break-word;}
+.instructions{background:#fef3c7;border:2px solid #fbbf24;border-radius:10px;padding:15px;}
+.instructions h4{color:#92400e;margin-bottom:10px;font-size:clamp(14px,3.5vw,18px);}
+.instructions ol{color:#78350f;padding-left:20px;font-size:clamp(12px,3vw,14px);}
+.instructions li{margin-bottom:5px;}
+.notice{background:#fff3cd;color:#856404;border:2px solid #ffeeba;border-radius:10px;padding:10px 15px;margin-bottom:15px;text-align:center;font-weight:bold;font-size:clamp(12px,3vw,16px);}
+.icon{font-size:clamp(32px,8vw,48px);margin-bottom:10px;}
+.checkmark{color:#10b981;font-size:clamp(16px,4vw,20px);margin-top:10px;display:none;}
+#downloadBtn{display:none;}
+.optional-badge{display:inline-block;background:#fbbf24;color:white;padding:3px 8px;border-radius:12px;font-size:clamp(9px,2vw,11px);font-weight:bold;margin-left:5px;}
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="notice">
-            🧠 Smart Matching එකට බොහෝ වේලාවක් ගත වනු ඇත. කරුණාකර බලා සිටින්න...
-        </div>
+<div class="container">
+<div class="notice">🧠 Smart Matching එකට බොහෝ වේලාවක් ගත වනු ඇත. කරුණාකර බලා සිටින්න...</div>
+<h1>🎬 Subtitle Smart Synchronizer</h1>
+<p class="subtitle">Original English → Spoken Sinhala Subtitle Converter</p>
 
-        <h1>🎬 Subtitle Smart Synchronizer (AI Enhanced)</h1>
-        <p class="subtitle">Original timing + Sinhala translation smart matching (AI powered)</p>
+<div class="upload-section">
+<div class="upload-box" id="originalBox" onclick="document.getElementById('originalFile').click()">
+<div class="icon">⏱️</div>
+<h3>Original Subtitle</h3>
+<p>(English / Other language)</p>
+<button class="btn btn-upload">📁 Upload කරන්න</button>
+<div class="checkmark" id="originalCheck">✓ Uploaded</div>
+<input type="file" id="originalFile" accept=".srt">
+</div>
 
-        <div class="upload-section">
-            <div class="upload-box" id="originalBox" onclick="document.getElementById('originalFile').click()">
-                <div class="icon">⏱️</div>
-                <h3>Original Subtitle</h3>
-                <p>(ඕනෑම භාෂාවක - timing සඳහා)</p>
-                <button class="btn btn-upload">📁 Upload කරන්න</button>
-                <div class="checkmark" id="originalCheck">✓ Uploaded</div>
-                <input type="file" id="originalFile" accept=".srt">
-            </div>
+<div class="upload-box" id="translatedBox" onclick="document.getElementById('translatedFile').click()">
+<div class="icon">📝</div>
+<h3>Sinhala Subtitle <span class="optional-badge">Optional</span></h3>
+<p>(If you already have translated file)</p>
+<button class="btn btn-upload">📁 Upload කරන්න</button>
+<div class="checkmark" id="translatedCheck">✓ Uploaded</div>
+<input type="file" id="translatedFile" accept=".srt">
+</div>
+</div>
 
-            <div class="upload-box" id="translatedBox" onclick="document.getElementById('translatedFile').click()">
-                <div class="icon">📝</div>
-                <h3>Sinhala Subtitle <span class="optional-badge">විකල්ප</span></h3>
-                <p>(පරිවර්තනය කළ - වචන සඳහා)</p>
-                <button class="btn btn-upload">📁 Upload කරන්න</button>
-                <div class="checkmark" id="translatedCheck">✓ Uploaded</div>
-                <input type="file" id="translatedFile" accept=".srt">
-            </div>
-        </div>
+<div id="statusBox" class="status" style="display:none;"></div>
 
-        <div id="statusBox" class="status" style="display:none;"></div>
+<div class="button-group">
+<button class="btn btn-sync" id="syncBtn" onclick="syncSubtitles()">🔄 Smart Sync කරන්න</button>
+<button class="btn btn-download" id="downloadBtn" onclick="downloadOutput()">⬇️ Download කරන්න</button>
+</div>
 
-        <div class="button-group">
-            <button class="btn btn-sync" id="syncBtn" onclick="syncSubtitles()">🔄 Smart Sync කරන්න</button>
-            <button class="btn btn-download" id="downloadBtn" onclick="downloadOutput()">⬇️ Download කරන්න</button>
-        </div>
+<div class="preview" id="logBox" style="display:none;background:#000;color:#0f0;max-height:200px;overflow-y:auto;">
+<h3 style="color:white;">Live Log:</h3>
+<pre id="logText" style="background:#000;color:#0f0;border:none;padding:5px;margin:0;white-space:pre-wrap;"></pre>
+</div>
 
-        <div class="preview" id="logBox" style="display:none; background:#000; color:#0f0;">
-            <h3 style="color:white;">Live Log:</h3>
-            <pre id="logText"></pre>
-        </div>
+<div class="preview" id="previewBox">
+<h3>Preview:</h3>
+<pre id="previewText"></pre>
+</div>
 
-        <div class="preview" id="previewBox">
-            <h3>Preview:</h3>
-            <pre id="previewText"></pre>
-        </div>
-
-        <div class="instructions">
-            <h4>📌 භාවිතා කරන ආකාරය:</h4>
-            <ol>
-                <li>Original subtitle එක upload කරන්න (timing සඳහා)</li>
-                <li>විකල්ප Sinhala subtitle එක upload කරන්න</li>
-                <li>"Smart Sync" ඔබන්න</li>
-                <li>AI එක meaning අනුව best Sinhala match එක හොයලා sync කරයි</li>
-            </ol>
-        </div>
-    </div>
+<div class="instructions">
+<h4>📌 භාවිතා කරන ආකාරය:</h4>
+<ol>
+<li>English subtitle එක upload කරන්න</li>
+<li>(Optional) Sinhala subtitle එකක් upload කරලා Smart Sync කරන්න</li>
+<li>එකක් නැත්නම් System එක English එකෙන්ම Spoken Sinhalaට translate කරයි</li>
+<li>Real-time log එකෙන් progress එක බලන්න</li>
+<li>Result එක download කරලා sub එකේ දාන්න</li>
+</ol>
+</div>
+</div>
 
 <script>
-let model, originalContent = null, translatedContent = null, outputContent = null;
+let originalContent=null,translatedContent=null,outputContent=null;
+function log(m){const l=document.getElementById("logBox"),t=document.getElementById("logText");l.style.display="block";t.textContent+=m+"\n";l.scrollTop=l.scrollHeight;}
 
-function log(msg) {
-    const box = document.getElementById("logBox");
-    const text = document.getElementById("logText");
-    box.style.display = "block";
-    text.textContent += msg + "\n";
-    box.scrollTop = box.scrollHeight;
-}
-
-async function loadModel() {
-    log("🧠 AI model load වෙනවා...");
-    model = await use.load();
-    log("✅ AI model load උනා!");
-}
-
-function parseSRT(content) {
-    const blocks = content.trim().split(/\n\s*\n/);
-    return blocks.map(block => {
-        const lines = block.split('\n');
-        return { index: lines[0], timing: lines[1], text: lines.slice(2).join(' ') };
-    });
-}
-
-function cosineSimilarity(a, b) {
-    let dot = 0, magA = 0, magB = 0;
-    for (let i = 0; i < a.length; i++) {
-        dot += a[i] * b[i];
-        magA += a[i] * a[i];
-        magB += b[i] * b[i];
-    }
-    return dot / (Math.sqrt(magA) * Math.sqrt(magB));
-}
-
-async function smartMatch(originalSubs, translatedSubs) {
-    log("⚙️ AI embeddings generate වෙනවා...");
-    const origEmb = await model.embed(originalSubs.map(s => s.text));
-    const tranEmb = await model.embed(translatedSubs.map(s => s.text));
-
-    const origArr = await origEmb.array();
-    const tranArr = await tranEmb.array();
-
-    const result = [];
-    for (let i = 0; i < translatedSubs.length; i++) {
-        let bestIdx = 0, bestScore = -1;
-        for (let j = 0; j < originalSubs.length; j++) {
-            const score = cosineSimilarity(tranArr[i], origArr[j]);
-            if (score > bestScore) {
-                bestScore = score;
-                bestIdx = j;
-            }
-        }
-        result.push({ index: i + 1, timing: originalSubs[bestIdx].timing, text: translatedSubs[i].text });
-        log(`🔍 Sinhala line ${i+1} → Original line ${bestIdx+1} (score: ${bestScore.toFixed(2)})`);
-    }
-    return result;
-}
-
-document.getElementById('originalFile').addEventListener('change', e => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-        originalContent = ev.target.result;
-        document.getElementById('originalBox').classList.add('uploaded');
-        document.getElementById('originalCheck').style.display = 'block';
-        log("🟦 Original file loaded");
-    };
-    reader.readAsText(e.target.files[0]);
+document.getElementById('originalFile').addEventListener('change',e=>{
+ const f=e.target.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=x=>{originalContent=x.target.result;
+ document.getElementById('originalBox').classList.add('uploaded');
+ document.getElementById('originalCheck').style.display='block';
+ showStatus('Original subtitle uploaded ✓','success');log("🟦 Original subtitle loaded");
+ };r.readAsText(f);
+});
+document.getElementById('translatedFile').addEventListener('change',e=>{
+ const f=e.target.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=x=>{translatedContent=x.target.result;
+ document.getElementById('translatedBox').classList.add('uploaded');
+ document.getElementById('translatedCheck').style.display='block';
+ showStatus('Sinhala subtitle uploaded ✓','success');log("🟩 Translated subtitle loaded");
+ };r.readAsText(f);
 });
 
-document.getElementById('translatedFile').addEventListener('change', e => {
-    const reader = new FileReader();
-    reader.onload = ev => {
-        translatedContent = ev.target.result;
-        document.getElementById('translatedBox').classList.add('uploaded');
-        document.getElementById('translatedCheck').style.display = 'block';
-        log("🟩 Sinhala file loaded");
-    };
-    reader.readAsText(e.target.files[0]);
-});
+function parseSRT(c){const b=c.trim().split(/\n\s*\n/);return b.map(x=>{const l=x.split('\n');return{index:l[0],timing:l[1],text:l.slice(2).join('\n')}});}
+function normalizeText(t){return t.toLowerCase().replace(/[.,!?;:"'\\-—()[\]{}]/g,'').replace(/\s+/g,' ').trim();}
+function calculateSimilarity(a,b){const l1=a.length,l2=b.length;if(l1===0)return l2;if(l2===0)return l1;let m=0;const ml=Math.max(l1,l2);for(let i=0;i<Math.min(l1,l2);i++){if(a[i]===b[i])m++;}return m/ml;}
 
-async function syncSubtitles() {
-    const syncBtn = document.getElementById("syncBtn");
-    syncBtn.disabled = true;
-    syncBtn.textContent = "⏳ Processing...";
-    document.getElementById("logText").textContent = "";
-
-    const originalSubs = parseSRT(originalContent);
-    const translatedSubs = parseSRT(translatedContent);
-    if (!model) await loadModel();
-
-    log("🚀 Smart matching start!");
-    const merged = await smartMatch(originalSubs, translatedSubs);
-
-    outputContent = merged.map(s => `${s.index}\n${s.timing}\n${s.text}\n`).join("\n");
-    document.getElementById('previewText').textContent = outputContent.slice(0, 1000) + '...';
-    document.getElementById('previewBox').style.display = 'block';
-    document.getElementById('downloadBtn').style.display = 'inline-block';
-    log("✅ Smart matching complete!");
-    syncBtn.disabled = false;
-    syncBtn.textContent = "🔄 Smart Sync කරන්න";
+async function translateText(text){
+ try{
+ const res=await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=si&dt=t&q=${encodeURIComponent(text)}`);
+ const d=await res.json();
+ if(d&&d[0]&&d[0][0]&&d[0][0][0]){
+ let tr=d[0][0][0];
+ return makeSinhalaConversational(tr);
+ }
+ return text;
+ }catch(e){log("⚠️ Translate fail: "+e.message);return text;}
 }
 
-function downloadOutput() {
-    const blob = new Blob([outputContent], { type: 'text/plain;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'SmartSynced_AI_Subtitles.srt';
-    a.click();
+function makeSinhalaConversational(text){
+ let r=text;
+ const conv={
+ 'ඇත':'තියෙනවා','නැත':'නෑ','ඔබ':'ඔයා','ඔහු':'එයා','ඇය':'එයා','එය':'ඒක','මෙය':'මේක',
+ 'කරනු ලැබේ':'කරනවා','ලැබේ':'ලැබෙනවා','වේ':'වෙනවා','විය':'උනා','කළ':'කළා','යනවා':'යනවා',
+ 'එනවා':'එනවා','ඇත්තේ':'තියෙන්නේ','කරමි':'කරනවා','යමි':'යනවා','එමි':'එනවා','කළෙමි':'කළා',
+ 'ගියෙමි':'ගියා','ආවෙමි':'ආවා','ඔබට':'ඔයාට','මම':'මම','අපි':'අපි','ඇත්තට':'අනිත්','ආහ්':'අපෝ'
+ };
+ for(const [f,i]of Object.entries(conv)){r=r.replace(new RegExp(f,'g'),i);}
+ r=r.replace(/ය$/g,'');
+ return r;
 }
+
+async function syncSubtitles(){
+ if(!originalContent){showStatus('⚠️ Original subtitle file එක upload කරන්න!','error');return;}
+ const btn=document.getElementById('syncBtn');
+ btn.disabled=true;btn.textContent='⏳ Processing...';document.getElementById("logText").textContent="";
+ try{
+ const orig=parseSRT(originalContent);
+ let trans=translatedContent?parseSRT(translatedContent):[];
+ log("🟦 Original subs: "+orig.length);
+ if(trans.length>0)log("🟩 Translated subs: "+trans.length);
+ const used=new Set(),out=[];
+ showStatus('🔄 Smart matching...','warning');
+ for(let i=0;i<orig.length;i++){
+ const o=orig[i];log(`➡️ ${i+1}/${orig.length} ${o.text}`);
+ let final=null;
+ if(trans.length>0){
+ let best=null,score=0,idx=-1;
+ const normO=normalizeText(o.text);
+ for(let j=0;j<trans.length;j++){
+ if(used.has(j))continue;
+ const normT=normalizeText(trans[j].text);
+ const sim=calculateSimilarity(normO,normT);
+ if(sim>score){score=sim;best=trans[j].text;idx=j;}
+ if(sim>0.7)break;
+ }
+ if(score>0.4){used.add(idx);final=best;}
+ }
+ if(!final){log("🌐 No Sinhala found → translating...");final=await translateText(o.text);}
+ out.push({index:i+1,timing:o.timing,text:final});
+ log("✔️ Done: "+final.slice(0,60)+"...");await new Promise(r=>setTimeout(r,200));
+ }
+ outputContent=out.map(s=>`${s.index}\n${s.timing}\n${s.text}\n`).join('\n');
+ document.getElementById('previewText').textContent=outputContent.slice(0,1000)+'...';
+ document.getElementById('previewBox').style.display='block';
+ document.getElementById('downloadBtn').style.display='inline-block';
+ showStatus(`✅ Smart Sync complete (${out.length} lines)`,`success`);
+ log("🏁 All done!");
+ }catch(e){showStatus('❌ '+e.message,'error');log("❌ Error: "+e.message);}
+ finally{btn.disabled=false;btn.textContent='🔄 Smart Sync කරන්න';}
+}
+
+function downloadOutput(){
+ if(!outputContent)return;
+ const blob=new Blob([outputContent],{type:'text/plain;charset=utf-8'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='spoken_sinhala_subtitles.srt';a.click();
+ URL.revokeObjectURL(a.href);
+}
+function showStatus(m,t){const s=document.getElementById('statusBox');s.textContent=m;s.className='status '+t;s.style.display='block';}
 </script>
 </body>
 </html>
