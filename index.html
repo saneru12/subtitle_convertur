@@ -1220,5 +1220,122 @@
         log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         log("📁 කරුණාකර ඔබේ උපසිරැසි ගොනු උඩුගත කරන්න");
     </script>
+
+    <!-- =============================== -->
+<!-- 🔔 SUBTITLE HELPER - POPUP NOTICE SECTION -->
+<!-- =============================== -->
+<section id="subtitle-notice">
+  <style>
+    /* Popup Overlay */
+    #popup-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    /* Popup Box */
+    #popup-box {
+      background: #fff;
+      padding: 25px 30px;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+      position: relative;
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* Title */
+    #popup-box h2 {
+      margin-top: 0;
+      color: #e63946;
+    }
+
+    /* Text */
+    #popup-box p {
+      font-size: 15px;
+      color: #222;
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    /* Buttons */
+    #popup-box button {
+      margin-top: 15px;
+      padding: 10px 18px;
+      border: none;
+      border-radius: 8px;
+      background: #007bff;
+      color: #fff;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    #popup-box button:hover {
+      background: #0056b3;
+    }
+
+    /* Close X */
+    #popup-close {
+      position: absolute;
+      top: 10px; right: 15px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: #555;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+
+  <!-- Popup HTML -->
+  <div id="popup-overlay">
+    <div id="popup-box">
+      <button id="popup-close">&times;</button>
+      <h2>📢 දැන්වීම</h2>
+      <p>
+"මේකෙන් ඔයාට පුලුවන් ඕගොල්ලන්ගෙ timing හරියට movie එකට ගැලපෙන්නෙ නැති sinhala sub හරියට හදාගන්න.පලමුව original sub එක (Timing හරියට යන english sub එක) දාන්න.දෙවනුව sinhala sub එක දාන්න.
+
+english sub එක පමනක් සින්හලට හරව ගන්න ඕන නම්.original sub එකට english sub එක දාල button එක press කරන්න"
+      </p>
+      <button id="popup-ok">කියවලා</button>
+    </div>
+  </div>
+
+  <script>
+    // popup show function
+    function showPopup() {
+      const overlay = document.getElementById("popup-overlay");
+      overlay.style.display = "flex";
+    }
+
+    // popup hide function
+    function hidePopup() {
+      const overlay = document.getElementById("popup-overlay");
+      overlay.style.display = "none";
+    }
+
+    // Event handlers
+    document.getElementById("popup-ok").onclick = hidePopup;
+    document.getElementById("popup-close").onclick = hidePopup;
+
+    // show popup on page load
+    window.addEventListener("load", showPopup);
+  </script>
+</section>
+<!-- =============================== -->
+<!-- END OF SUBTITLE HELPER NOTICE -->
+<!-- =============================== -->
+
 </body>
 </html>
